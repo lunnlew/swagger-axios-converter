@@ -12,6 +12,9 @@ const { importAxiosHeader, axiosConfigTemplate } = require("./lib/Template/impor
 const { interfaceTemplate } = require("./lib/Template/classTemplate")
 const { enumTemplate } = require("./lib/Template/enumTemplate")
 const { typeTemplate } = require("./lib/Template/typeTemplate")
+const {
+    hasProp
+} = require("./lib/utils/index")
 const defaultOptions = {
     serviceNameSuffix: 'Service',
     methodNameMode: 'operationId',
@@ -45,16 +48,32 @@ var format = function (text, options) {
         singleQuote: true
     });
 }
+// 方法名称缓存
+var methodNameCache = {}
 var codegenStart = function (AxiosHeader, options, requestTags, requestClass, models, enums) {
     // 处理接口
     for (let [className, requests] of Object.entries(requestClass)) {
         let text = '';
         requests.forEach(req => {
-            const reqName = options.methodNameMode == 'operationId' ? req.operationId : req.name;
+            let reqName = options.methodNameMode == 'operationId' ? req.operationId : req.name;
+            let c = 0
+            let isnew = false
+            // 重复名称处理
+            if(hasProp(methodNameCache, reqName)){
+                c = parseInt(methodNameCache[reqName]) + 1
+                isnew = true
+            }
+            methodNameCache[reqName] = c
+            if(isnew){
+                reqName =  reqName + c + ''
+            }
             text += requestMethodTemplate(reqName, req.requestSchema, options);
         });
+        if(!requestTags[className]){
+            console.log('warnning: className not exists in tags', className)
+        }
         text = requestServiceTemplate(className + options.serviceNameSuffix, text, 
-            requestTags[className].description?`
+            requestTags[className] && requestTags[className].description?`
             /**
               * ${requestTags[className].description}
               */

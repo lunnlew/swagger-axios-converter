@@ -16,7 +16,10 @@ var requestParametersCodegen = function (parameters) {
     let useBodyParams = parameters.filter(item => item.in === 'body').length > 1;
     let imports = [];
     for (const [index, param] of Object.entries(parameters)) {
-
+        if(!hasProp(param, 'name')){
+            console.log('warnning: param not has name', param)
+            continue
+        }
         let prop = {};
         if (hasProp(param, 'schema')) {
             prop = propAttr(param.schema)
@@ -29,7 +32,6 @@ var requestParametersCodegen = function (parameters) {
                 imports.push(prop.propType);
             }
         }
-
         const paramName = camelcase(param.name, { pascalCase: false })
         requestParameters += `
     /** ${param.description || ''} */

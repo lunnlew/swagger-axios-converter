@@ -100,9 +100,9 @@ var requestCodegen = function (paths) {
           } = {} as any,`
                     : '';
             // 处理响应数据
-            const { responseType, isRef: refResponseType } = getResponseType(operationProps);
+            const { responseType, isRef } = getResponseType(operationProps);
             // 如果返回值也是引用类型，则加入到类的引用里面
-            if (refResponseType) {
+            if (isRef) {
                 imports = Array.from(new Set(imports).add(responseType))
             };
 
