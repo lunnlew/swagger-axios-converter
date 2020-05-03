@@ -16,7 +16,8 @@ exports.axiosConfigTemplate = axiosConfigTemplate
 
 var importAxiosHeader = (options) => {
   return `
-  
+  // tslint:disable
+  /* eslint-disable */
   import axiosStatic, { AxiosInstance } from 'axios';
 
   export interface IRequestOptions {

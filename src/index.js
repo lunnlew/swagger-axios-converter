@@ -83,7 +83,10 @@ var codegenCommonDefine = function (options, multiple) {
     let AxiosHeader = options.useCustomerRequestInstance ? importCustomerAxiosHeader(options) : importAxiosHeader(options)
     if (multiple) {
         writeFile(options.outputDir || '.', 'request.ts', AxiosHeader);
-        AxiosHeader = `import { IRequestOptions, IRequestConfig, serviceOptions, getConfigs } from '../request'`
+        AxiosHeader = `
+  // tslint:disable
+  /* eslint-disable */
+  import { IRequestOptions, IRequestConfig, serviceOptions, getConfigs } from '../request'`
     }
     return {
         AxiosHeader

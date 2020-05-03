@@ -21,7 +21,8 @@ exports.customerAxiosConfigTemplate = customerAxiosConfigTemplate
 
 var importCustomerAxiosHeader = (options) => {
   return `
-  
+  // tslint:disable
+  /* eslint-disable */
   export interface IRequestOptions {
     headers?: any;
   }
