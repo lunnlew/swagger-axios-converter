@@ -7,6 +7,7 @@ const { requestCodegen } = require("./lib/Codegen/requestCodegen")
 const { tagsCodegen } = require("./lib/Codegen/tagsCodegen")
 const { requestServiceTemplate } = require("./lib/Template/requestServiceTemplate")
 const { requestMethodTemplate } = require("./lib/Template/requestMethodTemplate")
+const { mockTemplate } = require("./lib/Template/mockTemplate")
 const { importCustomerAxiosHeader, customerAxiosConfigTemplate } = require("./lib/Template/importCustomerAxiosHeader")
 const { importAxiosHeader, axiosConfigTemplate } = require("./lib/Template/importAxiosHeader")
 const { interfaceTemplate } = require("./lib/Template/classTemplate")
@@ -16,9 +17,11 @@ const {
     hasProp
 } = require("./lib/utils/index")
 const defaultOptions = {
+    mockDefines: undefined,
     serviceNameSuffix: 'Service',
     methodNameMode: 'operationId',
     outputDir: './service',
+    mockDir: './mock',
     fileName: 'index.ts',
     useStaticMethod: true,
     useCustomerRequestInstance: false,
@@ -35,9 +38,6 @@ var writeFile = function (fileDir, name, data) {
     fs.writeFileSync(filename, data);
 }
 var format = function (text, options) {
-    if (options.format) {
-        return options.format(text);
-    }
     return prettier.format(text, {
         printWidth: 120,
         tabWidth: 2,
@@ -98,6 +98,106 @@ var codegenStart = function (AxiosHeader, options, requestTags, requestClass, mo
     });
     writeFile(options.outputDir || '.', options.fileName || '', format(AxiosHeader, options));
 }
+var mockData = function(models, enums, p, options){
+    let ruleResult = ''
+    let existsDefine = undefined
+    if(options.mockDefines){
+       existsDefine = options.mockDefines.find(item => 
+        item.name===p.name && (
+            console.log('mockCheck',item.name, item.type),item.type===p.type || 
+            (Object.prototype.toString.call(item.type) === '[object Array]'?item.type.indexOf(p.type)!==-1:false)
+            ))
+    }
+    if(existsDefine){
+        return existsDefine.rule
+    }
+    switch(p.type){
+        case 'string':{
+            ruleResult = `'${p.name}':'@string(10)'`
+            break;
+        }
+        case 'string[]':{
+            ruleResult = `'${p.name}|1-10':'@string(10)'`
+            break;
+        }
+        case 'object':{
+            ruleResult = `'${p.name}':'{}'`
+            break;
+        }
+        case 'number':{
+            ruleResult = `'${p.name}|1-1000':1`
+            break;
+        }
+        default: {
+            let r = buildResponseMock(models, enums, p.type, options)
+            if(r.isModel){
+                ruleResult = `'${p.name}':` + `{${r.result}}`
+            } else {
+                ruleResult = `'${p.name}|1':` + `[${r.result}]`
+            }
+            break;
+        }
+    }
+    return ruleResult.replace('{null}','null')
+}
+var buildResponseMock = function(models, enums, modelType, options){
+    let model = models.find(item => item.value && item.value.name===modelType)
+    if(model){
+        return {
+            isModel:true,
+            result:model.value.props.map(p => mockData(models, enums, p, options)).join(',')
+        }
+    }
+    let enumk = enums.find(item => item.name && item.name===modelType)
+    if(enumk){
+        return {
+            isModel:false,
+            result:enumk.items.map(p => `'${p}'`).join(',')
+        }
+    }
+    
+    return {
+        isModel:true,
+        result:null
+    }
+}
+var mockStart = function (AxiosHeader, options, requestTags, requestClass, models, enums) {
+     for (let [className, requests] of Object.entries(requestClass)) {
+        let mocks = []
+        requests.forEach(req => {
+            let {
+                summary = '',
+                parameters = '',
+                responseType = '',
+                method = '',
+                contentType = 'multipart/form-data',
+                path = '',
+                pathReplace = '',
+                parsedParameters = {},
+                formData = '',
+                requestBody = null
+              } = req.requestSchema;
+              let r = buildResponseMock(Object.values(models), Object.values(enums), responseType, options).result
+              if(r!==null){
+                r = `{${r}}`
+              }
+              mocks.push({
+                path,
+                mockRule: r,
+                method
+              })
+        })
+        writeFile(options.mockDir || '.', className + '.mock.js', prettier.format(mockTemplate(mocks), {
+            printWidth: 120,
+            tabWidth: 2,
+            parser: 'typescript',
+            trailingComma: 'none',
+            jsxBracketSameLine: false,
+            semi: false,
+            singleQuote: true
+        }));
+     }
+}
 var codegenCommonDefine = function (options, multiple) {
     let AxiosHeader = options.useCustomerRequestInstance ? importCustomerAxiosHeader(options) : importAxiosHeader(options)
     if (multiple) {
@@ -151,6 +251,13 @@ var codegen = async function (options) {
                 axiosConfigTemplate(options, axiosConfig)
         }
         codegenStart(
+            ImportAxiosHeader,
+            multiple ? { ...options, outputDir: options.outputDir + '/' + part.name } : options,
+            requestTags,
+            requestClasses,
+            models,
+            enums);
+        mockStart(
             ImportAxiosHeader,
             multiple ? { ...options, outputDir: options.outputDir + '/' + part.name } : options,
             requestTags,

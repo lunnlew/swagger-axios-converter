@@ -16,13 +16,14 @@ var createDefinitionClass = function (className, properties, required) {
     let model = { name: className, props: [], imports: [] };
     const propertiesEntities = Object.entries(properties || {});
     for (const [k, v] of propertiesEntities) {
-        let { propType, isEnum, isArray, isType, ref } = propAttr(v);
+        let { propType, isEnum, isArray, isType, ref, items } = propAttr(v);
         // 数据枚举
         if (isEnum) {
             let enumName = `Enum${className}${k}`;
             enums.push({
                 name: enumName,
                 description: v.description,
+                items,
                 text: `export enum ${enumName}{
         ${propType}
       }`
@@ -36,6 +37,7 @@ var createDefinitionClass = function (className, properties, required) {
             enums.push({
                 name: typeName,
                 description: v.description,
+                items,
                 text: `type ${typeName} = ${propType};`
             });
             propType = isArray ? typeName + '[]' : typeName;
@@ -60,12 +62,14 @@ var createDefinitionClass = function (className, properties, required) {
 // 导出枚举定义
 var createDefinitionEnum = function (className, enumArray, type) {
     let result = '';
+    let items = [];
+    items = getEnums(enumArray)
     if (type === 'string') {
-        result = getEnums(enumArray).map(item => `'${item}'='${item}'`).join(',')
+        result = items.map(item => `'${item}'='${item}'`).join(',')
     } else {
-        result = getEnums(enumArray).join('|')
+        result = items.join('|')
     }
-    return { name: className, enumProps: result, type: type };
+    return { name: className, enumProps: result, type: type, items };
 }
 
 // 属性定义代码生成
@@ -83,6 +87,7 @@ var definitionsCodeGen = function (definitions) {
                 definitionEnums[`#/definitions/${k}`] = {
                     name: enumDef.name,
                     value: enumDef,
+                    items: enumDef.items,
                     description: v.description
                 };
             } else {
@@ -91,6 +96,7 @@ var definitionsCodeGen = function (definitions) {
                     definitionEnums[`#/definitions/${item.name}`] = {
                         name: item.name,
                         content: item.text,
+                        items: item.items,
                         description: item.description
                     };
                 });

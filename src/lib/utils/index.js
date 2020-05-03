@@ -32,7 +32,8 @@ exports.isGenerics = isGenerics
 
 // 获得类名称
 var genClassNameFromTags = function (originTags) {
-    return camelcase(originTags.length ? replaceSpecsToUnderline(originTags[0]) : 'Common', { pascalCase: true })
+    // 中文-english 自定义结构tag
+    return camelcase(originTags.length ? replaceSpecsToUnderline(originTags[0].split('-').pop()) : 'Common', { pascalCase: true })
 }
 exports.genClassNameFromTags = genClassNameFromTags
 
@@ -126,6 +127,7 @@ var propAttr = function (v) {
         isArray: false,
         isType: false,
         isImport: false,
+        items: [],
         isRef: false,
         ref: ''
     };
@@ -150,11 +152,13 @@ var propAttr = function (v) {
     } else if (hasProp(v, 'enum') && v.type == 'string') {
         // 数据枚举
         result.isEnum = true;
-        result.propType = getEnums(v.enum).map(item => `'${item}'='${item}'`).join(',');
+        result.items = getEnums(v.enum)
+        result.propType = result.items.map(item => `'${item}'='${item}'`).join(',');
     } else if (hasProp(v, 'enum')) {
         // 类型枚举
         result.isType = true;
-        result.propType = getEnums(v.enum).join('|');
+        result.items = getEnums(v.enum)
+        result.propType = result.items.join('|');
     } else {
         // 其他类型
         result.propType = convertJsType(v.type, v.format);
