@@ -57,7 +57,7 @@ var genRefName = function (ref) {
     } else {
         str = convertJsType(refName)
     }
-    return camelcase(str, { pascalCase: true })
+    return str
 }
 exports.genRefName = genRefName
 
