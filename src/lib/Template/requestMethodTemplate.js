@@ -1,3 +1,4 @@
+const { default: camelcase } = require("camelcase")
 var requestMethodTemplate = function (name, requestSchema, options) {
   let {
     summary = '',
@@ -17,7 +18,7 @@ var requestMethodTemplate = function (name, requestSchema, options) {
 /**
  * ${summary || ''}
  */
-${options.useStaticMethod ? 'static' : ''} ${name}(${parameters}options:IRequestOptions={}):Promise<${responseType}> {
+${options.useStaticMethod ? 'static' : ''} ${camelcase(name)}(${parameters}options:IRequestOptions={}):Promise<${responseType}> {
   return new Promise((resolve, reject) => {
     let url = '${path}'
     ${pathReplace}

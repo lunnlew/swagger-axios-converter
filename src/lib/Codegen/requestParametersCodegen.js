@@ -30,7 +30,7 @@ var requestParametersCodegen = function (parameters) {
             }
         }
 
-        const paramName = camelcase(param.name, { pascalCase: true })
+        const paramName = camelcase(param.name, { pascalCase: false })
         requestParameters += `
     /** ${param.description || ''} */
     ${paramName}${param.required ? '' : '?'}:${prop.propType},`;
