@@ -100,7 +100,7 @@ var codegenStart = function (AxiosHeader, options, requestTags, requestClass, mo
     });
     writeFile(options.outputDir || '.', options.fileName || '', format(AxiosHeader, options));
 }
-var mockData = function(models, enums, p, options){
+var mockData = function(models, enums, p, options, isRecursion){
     let ruleResult = ''
     // 支持自定义的转换器
     if(options.responseMockTransform && Object.prototype.toString.call(options.responseMockTransform) === '[object Function]'){
@@ -138,35 +138,59 @@ var mockData = function(models, enums, p, options){
             break;
         }
         default: {
+            // 处于递归中断
+            if(isRecursion){
+                return  `'${p.name}': null`
+            }
             let r = buildResponseMock(models, enums, p.type, options)
-            if(r.isModel){
-                ruleResult = `'${p.name}':` + `{${r.result}}`
+            if(r.isArray){
+                if(r.isModel){
+                    ruleResult = `'${p.name}|1-10':` + `[{${r.result}}]`
+                } else {
+                    ruleResult = `'${p.name}|1-10':` + `[${r.result}]`
+                }
             } else {
-                ruleResult = `'${p.name}|1':` + `[${r.result}]`
+                if(r.isModel){
+                    ruleResult = `'${p.name}':` + `{${r.result}}`
+                } else {
+                    ruleResult = `'${p.name}|1':` + `[${r.result}]`
+                }
             }
             break;
         }
     }
     return ruleResult.replace('{null}','null')
 }
+var buildModelTypeName = function(modelType){
+    return modelType.replace(/\[\]/g, '')
+}
+var isArrayField = function(modelType){
+    if(modelType.endsWith('[]')){
+        return true
+    }
+}
 var buildResponseMock = function(models, enums, modelType, options){
-    let model = models.find(item => item.value && item.value.name===modelType)
+    const isArray = isArrayField(modelType)
+    const modelTypeName = buildModelTypeName(modelType)
+    let model = models.find(item => item.value && item.value.name===modelTypeName)
     if(model){
         return {
             isModel:true,
-            result:model.value.props.map(p => mockData(models, enums, p, options)).join(',')
+            isArray: isArray,
+            result:model.value.props.map(p => mockData(models, enums, p, options, p.type===modelType)).join(',')
         }
     }
-    let enumk = enums.find(item => item.name && item.name===modelType)
+    let enumk = enums.find(item => item.name && item.name===modelTypeName)
     if(enumk){
         return {
             isModel:false,
+            isArray: isArray,
             result:enumk.items.map(p => `'${p}'`).join(',')
         }
     }
-    
     return {
         isModel:true,
+        isArray: isArray,
         result:null
     }
 }
