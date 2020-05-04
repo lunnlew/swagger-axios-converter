@@ -23,6 +23,7 @@ const defaultOptions = {
     methodNameMode: 'operationId',
     outputDir: './service',
     mockDir: './mock',
+    enableMock: false,
     fileName: 'index.ts',
     useStaticMethod: true,
     useCustomerRequestInstance: false,
@@ -265,7 +266,7 @@ var codegen = async function (options) {
             requestClasses,
             models,
             enums);
-        mockStart(
+        options.enableMock && mockStart(
             ImportAxiosHeader,
             multiple ? { ...options, outputDir: options.outputDir + '/' + part.name } : options,
             requestTags,
