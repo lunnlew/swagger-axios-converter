@@ -55,7 +55,7 @@ codegen({
     useMultipleSource: true,
     remoteUrl: [{
         name: 'default',
-        remoteUrl: 'https://fsc.zjhgrl.com/fsc/v2/api-docs?group=souche'
+        remoteUrl:'http://127.0.0.1/v2/api-docs'
     }]
 })
 ```
