@@ -1,18 +1,67 @@
 # swagger-axios-converter
 `swagger api`文档转换为`vue axios`接口定义生成工具
 
-## mock应用
+## codegen使用
 [mock参考](http://mockjs.com/examples.html)
 ```js
-mockDefines: [
-	{
-		name: 'addTime',
-		type: ['string', 'Date'],
-		rule: '\'addTime\':\'@datetime\''
-	}
-]
+const { codegen } = require('swagger-axios-converter')
+codegen({
+    outputDir: './src/services',
+    mockDir: './src/mock',
+    responseMockTransform: (prop, models, enums) => {
+    	console.log(prop)
+    	let ruleResult = undefined
+    	switch(prop.type){
+	        case 'string':{
+	            ruleResult = `'${prop.name}':'@string(10)'`
+	            break;
+	        }
+	        case 'string[]':{
+	            ruleResult = `'${prop.name}|1-10':'@string(10)'`
+	            break;
+	        }
+	        case 'object':{
+	            ruleResult = `'${prop.name}':'{}'`
+	            break;
+	        }
+	        case 'number':{
+	            ruleResult = `'${prop.name}|1-1000':1`
+	            break;
+	        }
+	        default: {break;}
+	    }
+	    return ruleResult
+    },
+    mockDefines: [{
+        name: 'name',
+        type: 'string',
+        rule: '\'name\':\'@cname\''
+    }, {
+        name: 'code',
+        type: 'string',
+        rule: '\'code|1\':[\'S\',\'E\']'
+    }, {
+        name: 'message',
+        type: 'string',
+        rule: '\'message|1\':[\'操作成功\',\'操作失败\']'
+    }, {
+        name: 'addTime',
+        type: ['string', 'Date'],
+        rule: '\'addTime\':\'@datetime\''
+    }
+    ],
+    useCustomerRequestInstance: true,
+    useStaticMethod: true,
+    useMultipleSource: true,
+    remoteUrl: [{
+        name: 'default',
+        remoteUrl: 'https://fsc.zjhgrl.com/fsc/v2/api-docs?group=souche'
+    }]
+})
 ```
 
+## mock使用
+以vue为例: 在main.js导入mock.js文件
 ```js
 // main.js
 import './mock'

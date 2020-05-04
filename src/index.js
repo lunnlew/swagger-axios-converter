@@ -18,6 +18,7 @@ const {
 } = require("./lib/utils/index")
 const defaultOptions = {
     mockDefines: undefined,
+    responseMockTransform: undefined,
     serviceNameSuffix: 'Service',
     methodNameMode: 'operationId',
     outputDir: './service',
@@ -100,16 +101,23 @@ var codegenStart = function (AxiosHeader, options, requestTags, requestClass, mo
 }
 var mockData = function(models, enums, p, options){
     let ruleResult = ''
-    let existsDefine = undefined
-    if(options.mockDefines){
-       existsDefine = options.mockDefines.find(item => 
-        item.name===p.name && (
-            console.log('mockCheck',item.name, item.type),item.type===p.type || 
+    // 支持自定义的转换器
+    if(options.responseMockTransform && Object.prototype.toString.call(options.responseMockTransform) === '[object Function]'){
+        ruleResult = options.responseMockTransform(p, models, enums)
+        if(ruleResult){
+            return ruleResult
+        }
+    }
+    // 支持部分定义转换
+    if(options.mockDefines && Object.prototype.toString.call(options.mockDefines) === '[object Array]'){
+        ruleResult = options.mockDefines.find(item => 
+            item.name===p.name && (
+            item.type===p.type || 
             (Object.prototype.toString.call(item.type) === '[object Array]'?item.type.indexOf(p.type)!==-1:false)
             ))
-    }
-    if(existsDefine){
-        return existsDefine.rule
+        if(ruleResult){
+            return ruleResult.rule
+        }
     }
     switch(p.type){
         case 'string':{

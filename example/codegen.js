@@ -1,13 +1,16 @@
 const { codegen } = require("../src/index");
 codegen({
     outputDir: './service',
-	mockDefines: [
-		{
-			name: 'addTime',
-			type: ['string', 'Date'],
-			rule: '\'addTime\':\'@datetime\''
-		}
-	],
+    responseMockTransform: (prop, models, enums) => {
+        console.log(prop)
+    },
+    mockDefines: [
+        {
+          name: 'addTime',
+          type: ['string', 'Date'],
+          rule: '\'addTime\':\'@datetime\''
+        }
+    ],
     useCustomerRequestInstance: true,
     useStaticMethod: true,
     useMultipleSource: true,
