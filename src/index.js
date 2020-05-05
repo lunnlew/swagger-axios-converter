@@ -251,7 +251,7 @@ var codegen = async function (options) {
         let { swaggerJson } = await cacheSwagger(options.remoteUrl).fetch();
         let url = new URL(options.remoteUrl)
         codegenParts.push({
-            'baseURL': url.origin + (url.port === '' ? '' : (':' + url.port)),
+            'baseURL': url.origin,
             'name': 'default',
             swaggerJson
         })
@@ -260,7 +260,7 @@ var codegen = async function (options) {
             let { swaggerJson } = await cacheSwagger(remote.remoteUrl).fetch();
             let url = new URL(remote.remoteUrl)
             codegenParts.push({
-                'baseURL': url.origin + (url.port === '' ? '' : (':' + url.port)),
+                'baseURL': url.origin,
                 'name': remote.name,
                 swaggerJson
             })
