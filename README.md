@@ -8,6 +8,7 @@ const { codegen } = require('swagger-axios-converter')
 codegen({
     outputDir: './src/services',
     mockDir: './src/mock',
+    enableMock: true,
     responseMockTransform: (prop, models, enums) => {
     	console.log(prop)
     	let ruleResult = undefined
