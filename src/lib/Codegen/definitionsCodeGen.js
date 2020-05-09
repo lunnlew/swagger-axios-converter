@@ -78,6 +78,11 @@ var definitionsCodeGen = function (definitions) {
     let definitionEnums = {};
     if (!!definitions) {
         for (const [k, v] of Object.entries(definitions)) {
+            // 跳过空定义名称
+            let nk = k.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
+            if(nk === ''){
+                continue
+            }
             let className = genRefName(k);
             if (isGenerics(className)) {
                 continue;

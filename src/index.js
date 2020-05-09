@@ -19,6 +19,7 @@ const {
 const defaultOptions = {
     mockDefines: undefined,
     responseMockTransform: undefined,
+    baseApiOrigin: undefined,
     serviceNameSuffix: 'Service',
     methodNameMode: 'operationId',
     outputDir: './service',
@@ -251,7 +252,7 @@ var codegen = async function (options) {
         let { swaggerJson } = await cacheSwagger(options.remoteUrl).fetch();
         let url = new URL(options.remoteUrl)
         codegenParts.push({
-            'baseURL': url.origin,
+            'baseURL': options.baseApiOrigin?options.baseApiOrigin:url.origin,
             'name': 'default',
             swaggerJson
         })
@@ -273,6 +274,10 @@ var codegen = async function (options) {
     let imports = ''
     for (let part of codegenParts) {
         let ImportAxiosHeader = AxiosHeader
+        if(!('paths' in part.swaggerJson)){
+            console.log('warnning:','not paths in current swaggerJson')
+            continue
+        }
         let { requestClasses } = requestCodegen(part.swaggerJson.paths)
         let { requestTags } = tagsCodegen(part.swaggerJson.tags)
         let { models, enums } = definitionsCodeGen(part.swaggerJson.definitions);
