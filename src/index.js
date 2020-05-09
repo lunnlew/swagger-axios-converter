@@ -261,7 +261,7 @@ var codegen = async function (options) {
             let { swaggerJson } = await cacheSwagger(remote.remoteUrl).fetch();
             let url = new URL(remote.remoteUrl)
             codegenParts.push({
-                'baseURL': url.origin,
+                'baseURL': options.baseApiOrigin?options.baseApiOrigin:url.origin,
                 'name': remote.name,
                 swaggerJson
             })
