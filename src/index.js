@@ -30,7 +30,8 @@ const defaultOptions = {
     useCustomerRequestInstance: false,
     modelMode: 'interface',
     strictNullChecks: true,
-    useMultipleSource: false
+    useMultipleSource: false,
+    baseOriginEnvName: 'VUE_APP_API_BASE_ORIGIN',
 };
 
 var writeFile = function (fileDir, name, data) {
@@ -254,6 +255,7 @@ var codegen = async function (options) {
         codegenParts.push({
             'baseURL': options.baseApiOrigin?options.baseApiOrigin:url.origin,
             'name': 'default',
+            'envBaseUrlOrigin': options.baseOriginEnvName,
             swaggerJson
         })
     } else if (Object.prototype.toString.call(options.remoteUrl) === '[object Array]') {
@@ -263,6 +265,7 @@ var codegen = async function (options) {
             codegenParts.push({
                 'baseURL': options.baseApiOrigin?options.baseApiOrigin:url.origin,
                 'name': remote.name,
+                'envBaseUrlOrigin': remote.envBaseUrlOrigin,
                 swaggerJson
             })
         }
@@ -284,6 +287,9 @@ var codegen = async function (options) {
         if (multiple) {
             // 多数据源API指定
             let axiosConfig = `configs.baseURL = '${part.baseURL}${part.swaggerJson.basePath}'`
+            if(part.envBaseUrlOrigin){
+                axiosConfig = `configs.baseURL = process.env.${part.envBaseUrlOrigin} + '${part.swaggerJson.basePath}'`
+            }
             ImportAxiosHeader += options.useCustomerRequestInstance ?
                 customerAxiosConfigTemplate(options, axiosConfig) :
                 axiosConfigTemplate(options, axiosConfig)
