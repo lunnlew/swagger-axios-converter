@@ -26,7 +26,7 @@ ${options.useStaticMethod ? 'static' : ''} ${camelcase(name)}(${parameters}optio
     ${parsedParameters && queryParameters.length > 0
       ? 'configs.params = {' + queryParameters.join(',') + '}'
       : ''}
-    let data = ${parsedParameters && bodyParameter && bodyParameter.length > 0
+    let data:any = ${parsedParameters && bodyParameter && bodyParameter.length > 0
       ? bodyParameter
       : !!requestBody
         ? 'params.body'
