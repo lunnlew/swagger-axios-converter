@@ -58,7 +58,7 @@ var genRefName = function (ref) {
     } else {
         str = convertJsType(refName)
     }
-    return str
+    return str.replace(/-/g,'')
 }
 exports.genRefName = genRefName
 

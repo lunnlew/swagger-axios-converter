@@ -35,7 +35,7 @@ var requestParametersCodegen = function (parameters) {
         const paramName = camelcase(param.name, { pascalCase: false })
         requestParameters += `
     /** ${param.description || ''} */
-    ${paramName}${param.required ? '' : '?'}:${prop.propType},`;
+    ${paramName}${param.required ? '' : '?'}:${prop.propType.replace(/-/g,'')},`;
 
         // 如果参数是从formData 提交
         if (param.in === 'formData') {
