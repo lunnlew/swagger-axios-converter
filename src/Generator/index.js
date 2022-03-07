@@ -1,7 +1,7 @@
 const { tpl_replace, normalizeStr, camelcaseStr } = require("../Util/util")
 const { CodeTpl } = require('../CodeTpl')
 const template = require('art-template');
-template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name).type };
+template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name)?.type || 'any' };
 template.defaults.imports.notEmpty = function (params) { return params.length > 0 };
 template.defaults.imports.toPlaceholder = function (name) {
     return `{${name}}`
@@ -448,7 +448,7 @@ const buildModelImports = function (model_defines, imports, is_recursion = false
     }
     return {
         models: models.concat(result.models),
-        imports: imports.concat(result.imports),
+        imports: Array.from(new Set(imports.concat(result.imports))),
     }
 }
 

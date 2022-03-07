@@ -26,7 +26,7 @@ export class {{class_define.name}} {
                     {{if notEmpty(api.parameters)}} 
                         {{each api.parameters param}}
                             {{if param.in=='path'}}
-                                url = url.replace('{{param.name|toPlaceholder}}', params['{{param.name}}']);
+                                url = url.replace('{{param.name|toPlaceholder}}', params['{{param.name}}'] as unknown as string);
                             {{else if param.in=='query'}}
                                 query['{{param.name}}'] = params['{{param.name}}'];
                             {{else if param.in=='body'}}
