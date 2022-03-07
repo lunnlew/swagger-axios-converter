@@ -71,7 +71,7 @@ const genModelDefineItem = function (name, model) {
 }
 
 /**
- * 规范会类声明名称
+ * 规范会化声明名称
  * @param {*} name 
  * @returns 
  */
