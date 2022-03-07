@@ -1,4 +1,4 @@
-const { tpl_replace, normalizeStr } = require("../Util/util")
+const { tpl_replace, normalizeStr, camelcaseStr } = require("../Util/util")
 const { CodeTpl } = require('../CodeTpl')
 const template = require('art-template');
 template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name).type };
@@ -126,8 +126,8 @@ const normalizeTypeName = function (name, property) {
                 }
             } else if (hasProp(property, 'enum')) {
                 return {
-                    name: normalizeStr('enum_' + name),
-                    type: normalizeStr('enum_' + name),
+                    name: camelcaseStr(normalizeStr('enum_' + name), true),
+                    type: camelcaseStr(normalizeStr('enum_' + name), true),
                     enums: property.enum,
                     summary: property.description,
                     isEnum: true,
@@ -245,7 +245,7 @@ const genMethodDefineItem = function (api) {
         api: {
             summary: api.summary,
             contentType: api.contentType,
-            name: normalizeStr(api.operationId, false),
+            name: normalizeStr(normalizeStr(api.operationId), false),
             path: api.path,
             method: api.method,
             parameters: parameters,

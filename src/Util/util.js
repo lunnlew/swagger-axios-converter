@@ -34,11 +34,20 @@ const code_format = function (text, options) {
 
 /**
  * 规范化字符串
- * @param {*} name 
+ * @param {*} str 
  * @returns 
  */
-const normalizeStr = function (str, pascalCase = true) {
-    return camelcase(str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]]/g).filter(v => v).join('_'), {
+const normalizeStr = function (str) {
+    return str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]]/g).filter(v => v).join('_')
+}
+
+/**
+ * 驼峰化字符串
+ * @param {*} str 
+ * @returns 
+ */
+const camelcaseStr = function (str, pascalCase = true) {
+    return camelcase(str, {
         pascalCase
     })
 }
@@ -46,3 +55,4 @@ const normalizeStr = function (str, pascalCase = true) {
 exports.code_format = code_format
 exports.tpl_replace = tpl_replace
 exports.normalizeStr = normalizeStr
+exports.camelcaseStr = camelcaseStr
