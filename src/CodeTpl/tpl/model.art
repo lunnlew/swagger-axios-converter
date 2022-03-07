@@ -1,0 +1,11 @@
+/**
+ * {{model.summary}}
+ */
+export interface {{model.name}} {
+    {{each model.properties property}}
+        /**
+         * {{property.summary}}
+         */
+        {{property.name}}: {{property.type}};
+    {{/each}}
+}

@@ -1,5 +1,8 @@
-const { tpl_replace } = require("../Util/util")
-const { default: camelcase } = require("camelcase")
+const { tpl_replace, normalizeStr } = require("../Util/util")
+const { CodeTpl } = require('../CodeTpl')
+const template = require('art-template');
+template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name).type };
+template.defaults.imports.notEmpty = function (params) { return params.length > 0 };
 
 const CLASS_CODE_STYLE = 'class'
 
@@ -56,7 +59,7 @@ const genModelDefineItem = function (name, model) {
             propertyDefine.enum.push({
                 name: property_type.type,
                 summary: property_type.summary || property.description || key,
-                items: property_type.items
+                enums: property_type.enums
             })
         }
     }
@@ -121,7 +124,7 @@ const normalizeTypeName = function (name, property) {
                 return {
                     name: normalizeStr('enum_' + name),
                     type: normalizeStr('enum_' + name),
-                    items: property.enum,
+                    enums: property.enum,
                     summary: property.description,
                     isEnum: true,
                     isBuildIn: isBuildInType('enum')
@@ -138,7 +141,7 @@ const normalizeTypeName = function (name, property) {
             return {
                 name: property_type.name + '[]',
                 type: property_type.type,
-                items: property_type.items,
+                enums: property_type.enums,
                 summary: property_type.summary || property.description,
                 isEnum: property_type.isEnum,
                 isBuildIn: isBuildInType(property_type.type)
@@ -179,24 +182,12 @@ const normalizeTypeName = function (name, property) {
 }
 
 /**
- * 规范化字符串
- * @param {*} name 
- * @returns 
- */
-const normalizeStr = function (str) {
-    return camelcase(str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]]/g).filter(v => v).join('_'), {
-        pascalCase: true
-    })
-}
-
-/**
  * 生成方法定义
  * @param {*} api 
  * @returns 
  */
 const genMethodDefineItem = function (api) {
     let parameters = []
-    let parameterDefine = ''
     let imports = []
     let enums = []
     if (api.parameters) {
@@ -205,32 +196,23 @@ const genMethodDefineItem = function (api) {
             parameters.push({
                 name: p.name,
                 summary: p.description,
+                in: p.in,
+                required: p.required,
                 type: parameter_type.name,
             });
             if (!parameter_type.isBuildIn) {
                 imports.push(parameter_type.type)
             }
-            if (!parameter_type.isEnum) {
+            if (parameter_type.isEnum) {
                 enums.push({
                     name: parameter_type.type,
                     summary: parameter_type.summary || p.description,
-                    items: parameter_type.items
+                    enums: parameter_type.enums
                 })
             }
         }
-        parameterDefine = parameters.map(p => `
-        /**
-         * ${p.summary}
-         */
-        ${p.name}: ${p.type};`).join('')
-        parameterDefine = `
-        params: {
-            ${parameterDefine}
-        }
-        `
     }
     let responses = []
-    let success_reponse_type = ''
     if (api.responses) {
         for (let code in api.responses) {
             let p = api.responses[code]
@@ -243,15 +225,12 @@ const genMethodDefineItem = function (api) {
             if (!response_type.isBuildIn) {
                 imports.push(response_type.type)
             }
-            if (!response_type.isEnum) {
+            if (response_type.isEnum) {
                 enums.push({
                     name: response_type.type,
                     summary: response_type.summary || p.description,
-                    items: response_type.items
+                    enums: response_type.enums
                 })
-            }
-            if (code == '200') {
-                success_reponse_type = response_type.name
             }
         }
     }
@@ -259,20 +238,13 @@ const genMethodDefineItem = function (api) {
     return {
         imports,
         enums,
-        method: `
-        /**
-         * ${api.summary}
-         */
-        static ${api.operationId}(${parameterDefine ? (parameterDefine + ', ') : ''}options: IRequestOptions = {}): Promise<${success_reponse_type}> {
-            return new Promise((resolve, reject) => {
-                let url = '${api.path}';
-                const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
-                let data: any = ${parameterDefine ? "params['param']" : 'null'};
-                configs.data = data;
-                axios(configs, resolve, reject);
-            })
+        method: {
+            summary: api.summary,
+            name: api.operationId,
+            path: api.path,
+            parameters: parameters,
+            responses: responses
         }
-        `
     }
 }
 
@@ -327,80 +299,18 @@ const buildModelDefine = function (models) {
  * @returns 
  */
 const getAxiosDefault = function () {
-    return `
-    
-  // tslint:disable
-  /* eslint-disable */
-  export interface IRequestOptions {
-    headers?: any;
-  }
-
-  export interface IRequestPromise<T=any> extends Promise<IRequestResponse<T>> {}
-
-  export interface IRequestResponse<T=any> {
-    data: T;
-    status: number;
-    statusText: string;
-    headers: any;
-    config: any;
-    request?: any;
-  }
-
-  export interface IRequestInstance {
-    (config: any): IRequestPromise;
-    (url: string, config?: any): IRequestPromise;
-    request<T = any>(config: any): IRequestPromise<T>;
-  }
-
-  export interface IRequestConfig {
-    method?: any;
-    headers?: any;
-    url?: any;
-    baseURL?: any;
-    data?: any;
-    params?: any;
-  }
-
-  export interface ServiceOptions {
-    axios?: IRequestInstance,
-  }
-
-  export const serviceOptions: ServiceOptions = {
-  };
-  
-  export function getConfigs(method: string, contentType: string, url: string,options: any):IRequestConfig {
-    const configs: IRequestConfig = { ...options, method, url };
-    configs.headers = {
-      ...options.headers,
-      'Content-Type': contentType,
-    };
-    return configs
-  }
-  `
+    return '\n' + CodeTpl().IRequest_tpl
 }
+
 /**
  * 默认axios导入
  * @returns 
  */
 const getDefaultAxiosImport = function (api_base = '', import_model_path = './') {
-    return `
-import { IRequestOptions, IRequestConfig, serviceOptions, getConfigs } from '${import_model_path}request';
-
-export function axios(configs: IRequestConfig, resolve: (p: any) => void, reject: (p: any) => void): Promise<any> {
-  if (serviceOptions.axios) {
-    configs.baseURL = '${api_base ? api_base : ''}/fsc-sso';
-    return serviceOptions.axios
-      .request(configs)
-      .then((res) => {
-        resolve(res.data);
-      })
-      .catch((err) => {
-        reject(err);
-      });
-  } else {
-    throw new Error('please inject yourself instance like axios  ');
-  }
-}`
+    return '\n' + template.render(CodeTpl().IRequestImport_tpl, {
+        api_base,
+        import_model_path
+    })
 }
 
 /**
@@ -421,24 +331,20 @@ const genSingleClassFile = function (classDefine, options) {
     let declare_model = ''
     if (imports.length > 0) {
         if (!options.inline_model_declare) {
-            import_code = `import {${Array.from(new Set(imports)).join(',')}} from '${import_model_path}model_index'`
+            import_code = `import { ${Array.from(new Set(imports)).join(', ')} } from '${import_model_path}model_index'`
         } else {
-            declare_model = buildModelDeclare(classDefine.models)
+            let { codes, enums } = buildModelDeclare(classDefine.models)
+            for (let enum_name in enums) {
+                codes.push(template.render(CodeTpl().enum_tpl, { enum_define: enums[enum_name] }))
+            }
+            declare_model = codes.join('\n')
         }
     }
 
     import_code += getDefaultAxiosImport(options.api_base, import_model_path)
-
     return {
         filename,
-        content: import_code + `
-        /**
-         * ${classDefine.name}
-         */
-        export class ${classDefine.name} {
-            ${classDefine.methods.join('')}
-        }
-        ` + declare_model
+        content: import_code + '\n' + template.render(CodeTpl().api_tpl, { class_define: classDefine }) + declare_model
     }
 }
 
@@ -452,34 +358,38 @@ const genAllClassFile = function (classes, options) {
 
     let filename = options.class_file_path_tpl ? tpl_replace(options.class_file_path_tpl, {
         group_name: options.group_name,
-        class_name: 'all'
+        class_name: 'service_index'
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
     let import_model_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
 
 
     let codes = []
+    let enums = {}
     for (let classDefine of classes) {
         imports.push(...classDefine.imports)
-        codes.push(`
-        /**
-         * ${classDefine.name}
-         */
-        export class ${classDefine.name} {
-            ${classDefine.methods.join('')}
+        if (options.inline_model_declare) {
+            let { codes: model_codes, enums: model_enums } = buildModelDeclare(classDefine.models)
+            codes.push(...model_codes)
+            enums = Object.assign({}, enums, model_enums)
         }
-        ` + (options.inline_model_declare ? buildModelDeclare(classDefine.models) : ''))
+        codes.push(template.render(CodeTpl().api_tpl, { class_define: classDefine }))
     }
+
     let import_code = ''
     if (imports.length > 0 && !options.inline_model_declare) {
         import_code = `import {${Array.from(new Set(imports)).join(',')}} from '${import_model_path}model_index'`
+    }
+
+    for (let enum_name in enums) {
+        codes.push(template.render(CodeTpl().enum_tpl, { enum_define: enums[enum_name] }))
     }
 
     import_code += getDefaultAxiosImport(options.api_base, import_model_path)
 
     return {
         filename,
-        content: import_code + codes.join('')
+        content: import_code + codes.join('\n')
     }
 }
 
@@ -492,40 +402,48 @@ const buildModelDeclare = function (model_defines) {
     let codes = []
     let enums = {}
     for (let model of model_defines) {
-        let itemPropertiyDefines = model.properties.map(p => `
-            /**
-             * ${p.summary}
-             */
-            ${p.name}: ${p.type};`).join('')
-
-        codes.push(`
-            /**
-             * ${model.summary}
-             */
-            export interface ${model.name} {
-                ${itemPropertiyDefines}
-            }`)
-
+        codes.push(template.render(CodeTpl().model_tpl, { model }))
         if (model.enum) {
             model.enum.map(v => {
                 enums[v.name] = v
             })
         }
     }
-
-    for (let enum_name in enums) {
-        let enum_item = enums[enum_name]
-        let itemEnumDefines = enum_item.items.map(p => `'${p}' = '${p}'`).join(',\r')
-        codes.push(`
-        /**
-         * ${enum_item.summary}
-         */
-        export enum ${enum_item.name} {
-            ${itemEnumDefines}
-        }`)
+    return {
+        codes,
+        enums
     }
+}
 
-    return codes.join('')
+/**
+ * 递归处理依赖
+ * @param {*} model_defines 
+ * @param {*} imports 
+ * @returns 
+ */
+const buildModelImports = function (model_defines, imports, is_recursion = false) {
+    let models = (model_defines.filter(v => imports.indexOf(v.name) !== -1) || [])
+    if (models.length == 0) {
+        return {
+            models: [],
+            imports: []
+        }
+    }
+    let result
+    if (is_recursion) {
+        result = buildModelImports(model_defines, Array.from(new Set(models.reduce((p, c) => {
+            return p.concat(c.imports.filter(v => v !== c.name))
+        }, []))))
+    } else {
+        result = {
+            models: models,
+            imports: imports
+        }
+    }
+    return {
+        models: models.concat(result.models),
+        imports: imports.concat(result.imports),
+    }
 }
 
 /**
@@ -536,24 +454,6 @@ const buildModelDeclare = function (model_defines) {
  */
 const genClassStyleCode = function (defines, options) {
     const { models: model_defines, apis: api_defines } = defines
-    // 文件列表
-    let files = []
-    let imports = []
-
-
-    if (!options.inline_model_declare) {
-        files.push({
-            filename: 'model_index.ts',
-            content: buildModelDeclare(model_defines)
-        })
-    } else {
-        imports = model_defines.reduce((p, v) => {
-            return p.concat(v.imports)
-        }, [])
-    }
-
-    options.relative_model_import = 0
-
     // 进行API分组
     let grouped = {}
     for (let api of api_defines) {
@@ -566,18 +466,34 @@ const genClassStyleCode = function (defines, options) {
 
     // 生成类风格定义
     let classes = []
+    let imports = []
     for (let grouped_key in grouped) {
         let classDefine = genClassDefineItem(grouped_key, grouped[grouped_key])
-        imports = Array.from(new Set(imports.concat(classDefine.imports)))
+        let { imports: class_imports, models: class_models } = buildModelImports(model_defines, Array.from(new Set(imports.concat(classDefine.imports))), options.inline_model_declare)
         classes.push({
             name: classDefine.name,
             summary: classDefine.name,
-            imports,
+            imports: class_imports,
             methods: classDefine.methods,
-            models: (model_defines.filter(v => imports.indexOf(v.name) !== -1) || [])
+            models: class_models
         })
-        imports = []
     }
+
+    // 文件列表
+    let files = []
+    if (!options.inline_model_declare) {
+        let { codes, enums } = buildModelDeclare(model_defines)
+        for (let enum_name in enums) {
+            codes.push(template.render(CodeTpl().enum_tpl, { enum_define: enums[enum_name] }))
+        }
+        files.push({
+            filename: 'model_index.ts',
+            content: codes.join('\n')
+        })
+    }
+
+    options.relative_model_import = 0
+
     grouped = undefined
     codes = []
 

@@ -1,4 +1,5 @@
 const prettier = require("prettier")
+const { default: camelcase } = require("camelcase")
 
 
 /**
@@ -31,5 +32,17 @@ const code_format = function (text, options) {
     });
 }
 
+/**
+ * 规范化字符串
+ * @param {*} name 
+ * @returns 
+ */
+const normalizeStr = function (str) {
+    return camelcase(str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]]/g).filter(v => v).join('_'), {
+        pascalCase: true
+    })
+}
+
 exports.code_format = code_format
 exports.tpl_replace = tpl_replace
+exports.normalizeStr = normalizeStr

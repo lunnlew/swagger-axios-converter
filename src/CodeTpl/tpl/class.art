@@ -1,0 +1,31 @@
+/**
+ * {{class_define.summary}}
+ */
+export class {{class_define.name}} {
+    {{each class_define.methods method}}
+        /**
+        * {{method.summary}}
+        */
+        static {{method.name}} (
+            {{if notEmpty(method.parameters)}} 
+            params: {
+                {{each method.parameters param}}
+                    /**
+                    * {{param.summary}}
+                    */
+                    {{param.name}}: {{param.type}};
+                {{/each}}
+            },
+            {{/if}}
+            options: IRequestOptions = {}
+            ): Promise<{{method.responses|toResponseTypeByName '200'}}> {
+                return new Promise((resolve, reject) => {
+                    let url = '{{method.path}}';
+                    const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
+                    let data: any = {{if notEmpty(method.parameters)}}params['param']{{else}}null{{/if}};
+                    configs.data = data;
+                    axios(configs, resolve, reject);
+                })
+        }
+    {{/each}}
+}

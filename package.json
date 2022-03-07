@@ -13,6 +13,7 @@
   "author": "lunnlew",
   "license": "MIT",
   "dependencies": {
+    "art-template": "^4.13.2",
     "camelcase": "^6.3.0",
     "prettier": "^2.5.1"
   }
