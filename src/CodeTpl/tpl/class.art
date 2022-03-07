@@ -23,20 +23,29 @@ export class {{class_define.name}} {
                     let url = '{{api.path}}';
                     let query = {} as any;
                     let data = {} as any;
+                    let formData = new FormData();
+                    {{ set useFormData = false }}
                     {{if notEmpty(api.parameters)}} 
                         {{each api.parameters param}}
                             {{if param.in=='path'}}
-                                url = url.replace('{{param.name|toPlaceholder}}', params['{{param.name}}'] as unknown as string);
+                                url = url.replace('{{param.name|toPlaceholder}}', params['{{param.name}}'] + '');
                             {{else if param.in=='query'}}
                                 query['{{param.name}}'] = params['{{param.name}}'];
                             {{else if param.in=='body'}}
                                 data['{{param.name}}'] = params['{{param.name}}'];
+                            {{else if param.in=='formData'}}
+                                {{set useFormData1 = useFormData = true}}
+                                formData.append('{{param.name}}', params['{{param.name}}']);
                             {{/if}}
                         {{/each}}
                     {{/if}}
                     const configs: IRequestConfig = getConfigs('{{api.method}}', '{{api.contentType}}', url, options);
                     configs.params = query;
+                    {{if useFormData}}
+                    configs.data = formData;
+                    {{else}}
                     configs.data = data;
+                    {{/if}}
                     axios(configs, resolve, reject);
                 })
         }
