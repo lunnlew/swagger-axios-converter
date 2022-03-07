@@ -2,27 +2,40 @@
  * {{class_define.summary}}
  */
 export class {{class_define.name}} {
-    {{each class_define.methods method}}
+    {{each class_define.apis api}}
         /**
-        * {{method.summary}}
+        * {{api.summary}}
         */
-        static {{method.name}} (
-            {{if notEmpty(method.parameters)}} 
+        static {{api.name}} (
+            {{if notEmpty(api.parameters)}} 
             params: {
-                {{each method.parameters param}}
+                {{each api.parameters param}}
                     /**
                     * {{param.summary}}
                     */
-                    {{param.name}}: {{param.type}};
+                    {{param.name}}{{if !param.required}}?{{/if}}: {{param.type}};
                 {{/each}}
             },
             {{/if}}
             options: IRequestOptions = {}
-            ): Promise<{{method.responses|toResponseTypeByName '200'}}> {
+            ): Promise<{{api.responses|toResponseTypeByName '200'}}> {
                 return new Promise((resolve, reject) => {
-                    let url = '{{method.path}}';
-                    const configs: IRequestConfig = getConfigs('post', 'application/json', url, options);
-                    let data: any = {{if notEmpty(method.parameters)}}params['param']{{else}}null{{/if}};
+                    let url = '{{api.path}}';
+                    let query = {} as any;
+                    let data = {} as any;
+                    {{if notEmpty(api.parameters)}} 
+                        {{each api.parameters param}}
+                            {{if param.in=='path'}}
+                                url = url.replace('{{param.name|toPlaceholder}}', params['{{param.name}}']);
+                            {{else if param.in=='query'}}
+                                query['{{param.name}}'] = params['{{param.name}}'];
+                            {{else if param.in=='body'}}
+                                data['{{param.name}}'] = params['{{param.name}}'];
+                            {{/if}}
+                        {{/each}}
+                    {{/if}}
+                    const configs: IRequestConfig = getConfigs('{{api.method}}', '{{api.contentType}}', url, options);
+                    configs.params = query;
                     configs.data = data;
                     axios(configs, resolve, reject);
                 })

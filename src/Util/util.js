@@ -37,9 +37,9 @@ const code_format = function (text, options) {
  * @param {*} name 
  * @returns 
  */
-const normalizeStr = function (str) {
+const normalizeStr = function (str, pascalCase = true) {
     return camelcase(str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]]/g).filter(v => v).join('_'), {
-        pascalCase: true
+        pascalCase
     })
 }
 

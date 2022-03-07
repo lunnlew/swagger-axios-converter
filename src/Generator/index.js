@@ -3,6 +3,9 @@ const { CodeTpl } = require('../CodeTpl')
 const template = require('art-template');
 template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name).type };
 template.defaults.imports.notEmpty = function (params) { return params.length > 0 };
+template.defaults.imports.toPlaceholder = function (name) {
+    return `{${name}}`
+}
 
 const CLASS_CODE_STYLE = 'class'
 
@@ -17,6 +20,7 @@ const genApiDefineItem = function (path, apis) {
         let apiDefine = {
             summary: apis[method].summary,
             method: method,
+            contentType: apis[method].consumes?.[0] || '',
             path: path,
             operationId: apis[method].operationId,
             responses: apis[method].responses,
@@ -238,10 +242,12 @@ const genMethodDefineItem = function (api) {
     return {
         imports,
         enums,
-        method: {
+        api: {
             summary: api.summary,
-            name: api.operationId,
+            contentType: api.contentType,
+            name: normalizeStr(api.operationId, false),
             path: api.path,
+            method: api.method,
             parameters: parameters,
             responses: responses
         }
@@ -257,13 +263,13 @@ const genMethodDefineItem = function (api) {
 const genClassDefineItem = function (name, apis) {
     let classDefine = {
         name: normalizeDeclareClassName(name),
-        methods: [],
+        apis: [],
         imports: []
     }
     for (let api of apis) {
         let itemDefine = genMethodDefineItem(api)
         classDefine.imports.push(...itemDefine.imports)
-        classDefine.methods.push(itemDefine.method)
+        classDefine.apis.push(itemDefine.api)
     }
     return classDefine
 }
@@ -474,7 +480,7 @@ const genClassStyleCode = function (defines, options) {
             name: classDefine.name,
             summary: classDefine.name,
             imports: class_imports,
-            methods: classDefine.methods,
+            apis: classDefine.apis,
             models: class_models
         })
     }
