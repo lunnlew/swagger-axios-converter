@@ -32,7 +32,7 @@ export class {{class_define.name}} {
                             {{else if param.in=='query'}}
                                 query['{{param.name}}'] = params['{{param.name}}'];
                             {{else if param.in=='body'}}
-                                data['{{param.name}}'] = params['{{param.name}}'];
+                                data = params['{{param.name}}'];
                             {{else if param.in=='formData'}}
                                 {{set useFormData1 = useFormData = true}}
                                 formData.append('{{param.name}}', params['{{param.name}}']);

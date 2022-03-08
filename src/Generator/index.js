@@ -1,4 +1,4 @@
-const { tpl_replace, normalizeStr, camelcaseStr } = require("../Util/util")
+const { normalizeStr, normalizeTypeName, normalizeDeclareClassName, tpl_replace } = require("../Util/util")
 const { CodeTpl } = require('../CodeTpl')
 const template = require('art-template');
 template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name)?.type || 'any' };
@@ -8,182 +8,6 @@ template.defaults.imports.toPlaceholder = function (name) {
 }
 
 const CLASS_CODE_STYLE = 'class'
-
-/**
- * 处理api定义
- * @param {*} path 
- * @param {*} apis 
- */
-const genApiDefineItem = function (path, apis) {
-    let apiDefines = []
-    for (let method in apis) {
-        let apiDefine = {
-            summary: apis[method].summary,
-            method: method,
-            contentType: apis[method].consumes?.[0] || '',
-            path: path,
-            operationId: apis[method].operationId,
-            responses: apis[method].responses,
-            parameters: apis[method].parameters,
-            group: apis[method].tags[0]
-        }
-        apiDefines.push(apiDefine)
-    }
-    return apiDefines
-}
-
-/**
- * 生成模型定义
- * @param {*} name 
- * @param {*} model 
- * @returns 
- */
-const genModelDefineItem = function (name, model) {
-    let propertyDefine = {
-        name: normalizeStr(name),
-        summary: model.description || model.title,
-        properties: [],
-        imports: []
-    }
-    for (let key in model.properties) {
-        let property = model.properties[key]
-        let property_type = normalizeTypeName(key, property)
-        propertyDefine.properties.push({
-            summary: property.description || key,
-            name: normalizeStr(key),
-            type: property_type.name
-        })
-        if (!property_type.isBuildIn) {
-            propertyDefine.imports.push(property_type.type)
-        }
-        if (property_type.isEnum) {
-            if (!propertyDefine.enum) {
-                propertyDefine.enum = []
-            }
-            propertyDefine.enum.push({
-                name: property_type.type,
-                summary: property_type.summary || property.description || key,
-                enums: property_type.enums
-            })
-        }
-    }
-    return propertyDefine
-}
-
-/**
- * 规范会化声明名称
- * @param {*} name 
- * @returns 
- */
-const normalizeDeclareClassName = function (name) {
-    return name.split('-').pop() + 'Service'
-}
-
-/**
- * 是否内建类型
- * @param {*} type 
- * @returns 
- */
-const isBuildInType = function (type) {
-    return ['string', 'number', 'boolean', 'array', 'any', 'file', 'date', 'object'].indexOf(type.toLowerCase()) !== -1
-}
-
-/**
- * 是否有属性
- * @param {*} obj 
- * @param {*} prop 
- * @returns 
- */
-const hasProp = function (obj, prop) {
-    return Object.prototype.hasOwnProperty.call(obj, prop)
-}
-
-/**
- * 规范化类型
- * @param {*} property 
- * @returns 
- */
-const normalizeTypeName = function (name, property) {
-    if (hasProp(property, 'type')) {
-        if (['integer', 'Int64', 'Int32', 'int', 'number'].indexOf(property.type) !== -1) {
-            return {
-                name: 'number',
-                type: 'number',
-                isBuildIn: isBuildInType('number')
-            }
-        } else if (['bool', 'boolean'].indexOf(property.type) !== -1) {
-            return {
-                name: 'boolean',
-                type: 'boolean',
-                isBuildIn: isBuildInType('boolean')
-            }
-        } else if (['string'].indexOf(property.type) !== -1) {
-            if (property.format === 'date' || property.format === 'date-time') {
-                return {
-                    name: 'Date',
-                    type: 'Date',
-                    isBuildIn: isBuildInType('Date')
-                }
-            } else if (hasProp(property, 'enum')) {
-                return {
-                    name: camelcaseStr(normalizeStr('enum_' + name), true),
-                    type: camelcaseStr(normalizeStr('enum_' + name), true),
-                    enums: property.enum,
-                    summary: property.description,
-                    isEnum: true,
-                    isBuildIn: isBuildInType('enum')
-                }
-            } else {
-                return {
-                    name: 'string',
-                    type: 'string',
-                    isBuildIn: isBuildInType('string')
-                }
-            }
-        } else if (property.type === 'array') {
-            let property_type = normalizeTypeName(name, property.items)
-            return {
-                name: property_type.name + '[]',
-                type: property_type.type,
-                enums: property_type.enums,
-                summary: property_type.summary || property.description,
-                isEnum: property_type.isEnum,
-                isBuildIn: isBuildInType(property_type.type)
-            }
-        } else if (property.type === 'file') {
-            return {
-                name: 'File',
-                type: 'File',
-                isBuildIn: isBuildInType('File')
-            }
-        } else if (property.type === 'ref') {
-            return {
-                name: 'any',
-                type: 'any',
-                isBuildIn: isBuildInType('any')
-            }
-        }
-        return {
-            name: normalizeStr(property.type),
-            type: normalizeStr(property.type),
-            isBuildIn: isBuildInType(property.type)
-        }
-    } else if (hasProp(property, '$ref')) {
-        let name = property['$ref'].split('/').pop()
-        return {
-            name: normalizeStr(name),
-            type: normalizeStr(name),
-            isBuildIn: isBuildInType(name)
-        }
-    } else if (hasProp(property, 'schema')) {
-        return normalizeTypeName(name, property.schema)
-    }
-    return {
-        name: 'any',
-        type: 'any',
-        isBuildIn: isBuildInType('any')
-    }
-}
 
 /**
  * 生成方法定义
@@ -272,32 +96,6 @@ const genClassDefineItem = function (name, apis) {
         classDefine.apis.push(itemDefine.api)
     }
     return classDefine
-}
-
-/**
- * 处理api定义
- * @param {*} api_paths 
- */
-const buildApiDefine = function (api_paths) {
-    // 统一api信息定义
-    let defines = []
-    for (let path in api_paths) {
-        defines.push(...genApiDefineItem(path, api_paths[path]))
-    }
-    return defines
-}
-
-/**
- * 处理model定义
- * @param {*} definitions 
- */
-const buildModelDefine = function (models) {
-    // 统一model信息定义
-    let defines = []
-    for (let key in models) {
-        defines.push(genModelDefineItem(key, models[key]))
-    }
-    return defines
 }
 
 /**
@@ -522,23 +320,11 @@ const genClassStyleCode = function (defines, options) {
     return files
 }
 
-/**
- * 搜集生成结果
- * @param {*} api_define 
- * @param {*} options 
- */
-const collectGenerateInfo = function (api_define, options) {
+const run = function (api_define, options) {
     if (!options.code_style || options.code_style === CLASS_CODE_STYLE) {
-        return genClassStyleCode({
-            models: buildModelDefine(api_define.definitions),
-            apis: buildApiDefine(api_define.paths)
-        }, options)
+        return genClassStyleCode(api_define, options)
     } else {
         throw new Error('暂不支持其他风格')
     }
-}
-
-const run = function (api_define, options) {
-    return collectGenerateInfo(api_define, options)
 }
 exports.run = run

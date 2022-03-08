@@ -1,5 +1,6 @@
 const { request } = require("../Util/request")
 const SWAGGER_VERSION_2 = '2.0'
+const OPENAPI_VERSION_3 = '3.0.0'
 
 /**
  * 类型探测
@@ -23,6 +24,16 @@ const measure = function (data) {
                         data: source_data
                     }
                 }
+            } else if (source_data.openapi) {
+                if (source_data.openapi === OPENAPI_VERSION_3) {
+                    return {
+                        type: 'openapi',
+                        version: OPENAPI_VERSION_3,
+                        data: source_data
+                    }
+                }
+            } else {
+                throw new Error('暂未支持的数据源')
             }
         }
     }
@@ -47,8 +58,10 @@ const parse = function (content) {
     let parser
     if (type === 'swagger') {
         parser = require('./Swagger/parser_' + version)
+    } else if (type === 'openapi') {
+        parser = require('./Openapi/parser_' + version)
     } else {
-        throw new Error('尚未支持的解析类型' + type + version)
+        throw new Error('尚未支持的解析类型: ' + type + ' ' + version)
     }
     return parser.run(data)
 }

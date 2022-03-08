@@ -1,6 +1,6 @@
 const { Extractor, Generator, FileWriter } = require('../src/index')
 
-Extractor.fetch('https://petstore.swagger.io/v2/swagger.json').then(res => {
+Extractor.fetch('https://app.swaggerhub.com/apiproxy/registry/Oorjit/payment-platform_api/V1').then(res => {
     FileWriter.write(Generator.run(Extractor.parse(res), {
         api_base: '/222/',
         /**
