@@ -111,6 +111,7 @@ const genModelDefineItem = function (name, model) {
     }
     for (let key in model.properties) {
         let property = model.properties[key]
+        // TODO property.properties
         let property_type = normalizeTypeName(key, property)
         propertyDefine.properties.push({
             summary: property.description || key,
