@@ -1,5 +1,18 @@
 const { normalizeStr, normalizeTypeName } = require("../../Util/util")
 
+const parseProperties = function (property) {
+    return property.properties ? Object.keys(property.properties).map(k => {
+        let p = property.properties[k]
+        let p_type = normalizeTypeName(normalizeStr(k), p)
+        return {
+            summary: k,
+            name: k,
+            type: p_type.name,
+            properties: parseProperties(p)
+        }
+    }) : []
+}
+
 /**
  * 生成模型定义
  * @param {*} name 
@@ -15,12 +28,12 @@ const genModelDefineItem = function (name, model) {
     }
     for (let key in model.properties) {
         let property = model.properties[key]
-        // TODO property.properties
         let property_type = normalizeTypeName(key, property)
         propertyDefine.properties.push({
             summary: property.description || key,
             name: normalizeStr(key),
-            type: property_type.name
+            type: property_type.name,
+            properties: parseProperties(property)
         })
         if (!property_type.isBuildIn) {
             propertyDefine.imports.push(property_type.type)

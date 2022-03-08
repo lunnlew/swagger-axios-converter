@@ -111,12 +111,20 @@ const genModelDefineItem = function (name, model) {
     }
     for (let key in model.properties) {
         let property = model.properties[key]
-        // TODO property.properties
         let property_type = normalizeTypeName(key, property)
         propertyDefine.properties.push({
             summary: property.description || key,
             name: normalizeStr(key),
-            type: property_type.name
+            type: property_type.name,
+            properties: property.properties ? Object.keys(property.properties).map(k => {
+                let p = property.properties[k]
+                let p_type = normalizeTypeName(normalizeStr(k), p)
+                return {
+                    summary: k,
+                    name: k,
+                    type: p_type.name
+                }
+            }) : undefined
         })
         if (!property_type.isBuildIn) {
             propertyDefine.imports.push(property_type.type)

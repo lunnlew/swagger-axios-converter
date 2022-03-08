@@ -103,7 +103,7 @@ const genClassDefineItem = function (name, apis) {
  * @returns 
  */
 const getAxiosDefault = function () {
-    return '\n' + CodeTpl().IRequest_tpl
+    return '\n' + CodeTpl('IRequest_tpl').render()
 }
 
 /**
@@ -111,7 +111,7 @@ const getAxiosDefault = function () {
  * @returns 
  */
 const getDefaultAxiosImport = function (api_base = '', import_model_path = './') {
-    return '\n' + template.render(CodeTpl().IRequestImport_tpl, {
+    return '\n' + CodeTpl('IRequestImport_tpl').render({
         api_base,
         import_model_path
     })
@@ -139,7 +139,7 @@ const genSingleClassFile = function (classDefine, options) {
         } else {
             let { codes, enums } = buildModelDeclare(classDefine.models)
             for (let enum_name in enums) {
-                codes.push(template.render(CodeTpl().enum_tpl, { enum_define: enums[enum_name] }))
+                codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
             }
             declare_model = codes.join('\n')
         }
@@ -148,7 +148,7 @@ const genSingleClassFile = function (classDefine, options) {
     import_code += getDefaultAxiosImport(options.api_base, import_model_path)
     return {
         filename,
-        content: import_code + '\n' + template.render(CodeTpl().api_tpl, { class_define: classDefine }) + declare_model
+        content: import_code + '\n' + CodeTpl('class_tpl').render({ class_define: classDefine }) + declare_model
     }
 }
 
@@ -177,7 +177,7 @@ const genAllClassFile = function (classes, options) {
             codes.push(...model_codes)
             enums = Object.assign({}, enums, model_enums)
         }
-        codes.push(template.render(CodeTpl().api_tpl, { class_define: classDefine }))
+        codes.push(CodeTpl('class_tpl').render({ class_define: classDefine }))
     }
 
     let import_code = ''
@@ -186,7 +186,7 @@ const genAllClassFile = function (classes, options) {
     }
 
     for (let enum_name in enums) {
-        codes.push(template.render(CodeTpl().enum_tpl, { enum_define: enums[enum_name] }))
+        codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
     }
 
     import_code += getDefaultAxiosImport(options.api_base, import_model_path)
@@ -206,7 +206,7 @@ const buildModelDeclare = function (model_defines) {
     let codes = []
     let enums = {}
     for (let model of model_defines) {
-        codes.push(template.render(CodeTpl().model_tpl, { model }))
+        codes.push(CodeTpl('model_tpl').render({ model }))
         if (model.enum) {
             model.enum.map(v => {
                 enums[v.name] = v
@@ -288,7 +288,7 @@ const genClassStyleCode = function (defines, options) {
     if (!options.inline_model_declare) {
         let { codes, enums } = buildModelDeclare(model_defines)
         for (let enum_name in enums) {
-            codes.push(template.render(CodeTpl().enum_tpl, { enum_define: enums[enum_name] }))
+            codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
         }
         files.push({
             filename: 'model_index.ts',

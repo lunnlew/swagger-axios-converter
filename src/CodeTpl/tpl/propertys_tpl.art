@@ -1,0 +1,8 @@
+{
+    {{each properties property}}
+        /**
+         * {{property.summary}}
+         */
+        {{property.name}}: {{if property.properties}}{{include './propertys_tpl' property}}{{else}}{{property.type}}{{/if}};
+    {{/each}}
+}
