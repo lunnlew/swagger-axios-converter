@@ -1,8 +1,22 @@
 const path = require("path")
 const fs = require("fs")
 const { code_format } = require("../Util/util")
-
+const default_options = {
+    /**
+     * 输出位置
+     */
+    output: './out',
+    /**
+     * 是否先清空目录
+     */
+    clear: true,
+    /**
+     * 是否格式化
+     */
+    format: false
+}
 const write = function (files, options) {
+    options = Object.assign({}, default_options, options)
     const path_dir = options.output || './'
     if (options.clear) {
         fs.rmSync(path_dir, { recursive: true, force: true })

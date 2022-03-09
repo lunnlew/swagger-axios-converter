@@ -9,6 +9,33 @@ template.defaults.imports.toPlaceholder = function (name) {
 
 const CLASS_CODE_STYLE = 'class'
 
+const default_options = {
+    /**
+     * api base
+     */
+    api_base: '/',
+    /**
+     * 代码风格
+     */
+    code_style: 'class',
+    /**
+     * 类单一文件声明
+     */
+    single_class_declare: true,
+    /**
+     * 是否内嵌模型声明
+     */
+    inline_model_declare: false,
+    /**
+     * 类文件路径模板
+     */
+    class_file_path_tpl: '{group_name}/index.ts',
+    /**
+     * 分组名
+     */
+    group_name: 'common'
+}
+
 /**
  * 生成方法定义
  * @param {*} api 
@@ -321,6 +348,7 @@ const genClassStyleCode = function (defines, options) {
 }
 
 const run = function (api_define, options) {
+    options = Object.assign({}, default_options, options)
     if (!options.code_style || options.code_style === CLASS_CODE_STYLE) {
         return genClassStyleCode(api_define, options)
     } else {
