@@ -7,7 +7,7 @@ Extractor.fetch(
   "https://app.swaggerhub.com/apiproxy/registry/wangyf/Cable/1.0.0"
 ).then((res) => {
   FileWriter.write(
-    Generator.run(Extractor.run(res), {
+    Generator.run(Extractor.parse(res), {
       /**
        * api公共路径
        */

@@ -54,9 +54,9 @@ const fetch = async function (url) {
  * @param {*} data 
  * @returns 
  */
-const run = function (content) {
+const parse = function (content) {
     return new Transform().toInterimApiDefine(content).build()
 }
 
 exports.fetch = fetch
-exports.run = run
+exports.parse = parse
