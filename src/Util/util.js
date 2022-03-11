@@ -159,7 +159,7 @@ const hasProp = function (obj, prop) {
 }
 
 /**
- * 规范会化声明名称
+ * 规范化声明名称
  * @param {*} name 
  * @returns 
  */
