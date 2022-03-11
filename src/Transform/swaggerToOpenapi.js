@@ -1,6 +1,7 @@
 function run(content) {
     return {
-        type: "3.0.0",
+        type: "openapi",
+        version: "3.0.0",
         data: {
             openapi: "3.0.0",
             paths: content.data.paths,
