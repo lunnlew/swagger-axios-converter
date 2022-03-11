@@ -3,9 +3,11 @@
 ```js
 const { Extractor, Generator, FileWriter } = require("../src/index");
 
-Extractor.fetch("http://127.0.0.1/v2/api-docs?group=common").then((res) => {
+Extractor.fetch(
+  "https://app.swaggerhub.com/apiproxy/registry/wangyf/Cable/1.0.0"
+).then((res) => {
   FileWriter.write(
-    Generator.run(Extractor.parse(res), {
+    Generator.run(Extractor.run(res), {
       /**
        * api公共路径
        */
