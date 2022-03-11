@@ -1,5 +1,7 @@
 const { Extractor, Generator, FileWriter } = require('../src/index')
 
-Extractor.fetch('https://app.swaggerhub.com/apiproxy/registry/Oorjit/payment-platform_api/V1').then(res => {
-    FileWriter.write(Generator.run(Extractor.parse(res)))
+Extractor.fetch('https://app.swaggerhub.com/apiproxy/registry/wangyf/Cable/1.0.0').then(res => {
+    FileWriter.write(Generator.run(Extractor.run(res)), {
+        output: './dist'
+    })
 })

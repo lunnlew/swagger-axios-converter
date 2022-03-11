@@ -1,4 +1,5 @@
 const { request } = require("../Util/request")
+const { Transform } = require('../Transform')
 const SWAGGER_VERSION_2 = '2.0'
 const OPENAPI_VERSION_3 = '3.0.0'
 
@@ -53,18 +54,9 @@ const fetch = async function (url) {
  * @param {*} data 
  * @returns 
  */
-const parse = function (content) {
-    const { type, version, data } = content
-    let parser
-    if (type === 'swagger') {
-        parser = require('./Swagger/parser_' + version)
-    } else if (type === 'openapi') {
-        parser = require('./Openapi/parser_' + version)
-    } else {
-        throw new Error('尚未支持的解析类型: ' + type + ' ' + version)
-    }
-    return parser.run(data)
+const run = function (content) {
+    return new Transform().toInterimApiDefine(content).build()
 }
 
 exports.fetch = fetch
-exports.parse = parse
+exports.run = run

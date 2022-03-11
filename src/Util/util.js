@@ -38,7 +38,7 @@ const code_format = function (text, options) {
  * @returns 
  */
 const normalizeStr = function (str) {
-    return str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]]/g).filter(v => v).join('_')
+    return str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\] ]/g).filter(v => v).join('_')
 }
 
 /**
@@ -164,7 +164,7 @@ const hasProp = function (obj, prop) {
  * @returns 
  */
 const normalizeDeclareClassName = function (name) {
-    return name.split('-').pop() + 'Service'
+    return camelcaseStr(normalizeStr(name).split('-').pop() + 'Service', true)
 }
 
 exports.code_format = code_format
