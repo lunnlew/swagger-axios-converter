@@ -4,11 +4,21 @@ const SWAGGER_VERSION_2 = '2.0'
 const OPENAPI_VERSION_3 = '3.0.0,3.0.1'
 
 /**
- * 类型探测
+ * 获取远程内容
  * @param {*} data 
  * @returns 
  */
-const measure = function (data) {
+const fetch = async function (url) {
+    return await request(url)
+}
+
+/**
+ * 获取远程内容
+ * @param {*} data 
+ * @returns 
+ */
+const measure = async function (url) {
+    let data = await request(url)
     if (data.type.indexOf('application/json') !== -1) {
         let source_data
         try {
@@ -18,7 +28,7 @@ const measure = function (data) {
         }
         if (source_data) {
             if (source_data.swagger) {
-                if (SWAGGER_VERSION_2.indexOf(source_data.swagger)!==-1) {
+                if (SWAGGER_VERSION_2.indexOf(source_data.swagger) !== -1) {
                     return {
                         type: 'swagger',
                         version: source_data.swagger,
@@ -26,7 +36,7 @@ const measure = function (data) {
                     }
                 }
             } else if (source_data.openapi) {
-                if (OPENAPI_VERSION_3.indexOf(source_data.openapi)!==-1) {
+                if (OPENAPI_VERSION_3.indexOf(source_data.openapi) !== -1) {
                     return {
                         type: 'openapi',
                         version: source_data.openapi,
@@ -34,19 +44,10 @@ const measure = function (data) {
                     }
                 }
             } else {
-                throw new Error('暂未支持的数据源')
+                throw new Error('暂未支持的数据源: ' + url)
             }
         }
     }
-}
-
-/**
- * 获取远程内容
- * @param {*} data 
- * @returns 
- */
-const fetch = async function (url) {
-    return measure(await request(url))
 }
 
 /**
@@ -60,3 +61,4 @@ const parse = function (content) {
 
 exports.fetch = fetch
 exports.parse = parse
+exports.measure = measure
