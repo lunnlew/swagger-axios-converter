@@ -97,8 +97,8 @@ const normalizeTypeName = function (name, property) {
         } else if (property.type === 'array') {
             let property_type = normalizeTypeName(name, property.items)
             return {
-                name: property_type.name + '[]',
-                type: property_type.type,
+                name: property_type.name,
+                type: property_type.type + '[]',
                 enums: property_type.enums,
                 summary: property_type.summary || property.description,
                 isEnum: property_type.isEnum,

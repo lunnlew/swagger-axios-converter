@@ -93,7 +93,7 @@ class InterimApiDefine {
             if (DefaultRequestBody) {
                 let RequestBodyType = normalizeTypeName('RequestBody', DefaultRequestBody)
                 parameters.push({
-                    description: RequestBodyType.type,
+                    description: RequestBodyType.name,
                     name: DefaultRequestBody.refName,
                     in: "body",
                     required: DefaultRequestBody.require,
@@ -133,14 +133,14 @@ class InterimApiDefine {
             propertyDefine.properties.push({
                 summary: property.description || key,
                 name: normalizeStr(key),
-                type: property_type.name,
+                type: property_type.type,
                 properties: property.properties ? Object.keys(property.properties).map(k => {
                     let p = property.properties[k]
                     let p_type = normalizeTypeName(normalizeStr(k), p)
                     return {
                         summary: k,
                         name: k,
-                        type: p_type.name
+                        type: p_type.type
                     }
                 }) : undefined
             })

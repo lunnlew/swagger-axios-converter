@@ -53,7 +53,7 @@ const genMethodDefineItem = function (api) {
                 summary: p.description,
                 in: p.in,
                 required: p.required,
-                type: parameter_type.name,
+                type: parameter_type.type,
             });
             if (!parameter_type.isBuildIn) {
                 imports.push(parameter_type.type)
@@ -75,7 +75,7 @@ const genMethodDefineItem = function (api) {
             responses.push({
                 name: code,
                 summary: p.description,
-                type: response_type.name
+                type: response_type.type
             });
             if (!response_type.isBuildIn) {
                 imports.push(response_type.type)
