@@ -43,7 +43,7 @@ const genMethodDefineItem = function (api) {
         for (let p of api.parameters) {
             let parameter_type = normalizeTypeName(p.name, p)
             parameters.push({
-                name: p.name,
+                name: parameter_type.name,
                 summary: p.description,
                 in: p.in,
                 required: p.required,

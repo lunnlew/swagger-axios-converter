@@ -61,20 +61,20 @@ const normalizeTypeName = function (name, property) {
     if (hasProp(property, 'type')) {
         if (['integer', 'Int64', 'Int32', 'int', 'number'].indexOf(property.type) !== -1) {
             return {
-                name: 'number',
+                name,
                 type: 'number',
                 isBuildIn: isBuildInType('number')
             }
         } else if (['bool', 'boolean'].indexOf(property.type) !== -1) {
             return {
-                name: 'boolean',
+                name,
                 type: 'boolean',
                 isBuildIn: isBuildInType('boolean')
             }
         } else if (['string'].indexOf(property.type) !== -1) {
             if (property.format === 'date' || property.format === 'date-time') {
                 return {
-                    name: 'Date',
+                    name,
                     type: 'Date',
                     isBuildIn: isBuildInType('Date')
                 }
@@ -89,7 +89,7 @@ const normalizeTypeName = function (name, property) {
                 }
             } else {
                 return {
-                    name: 'string',
+                    name,
                     type: 'string',
                     isBuildIn: isBuildInType('string')
                 }
@@ -106,13 +106,13 @@ const normalizeTypeName = function (name, property) {
             }
         } else if (property.type === 'file') {
             return {
-                name: 'File',
+                name,
                 type: 'File',
                 isBuildIn: isBuildInType('File')
             }
         } else if (property.type === 'ref') {
             return {
-                name: 'any',
+                name,
                 type: 'any',
                 isBuildIn: isBuildInType('any')
             }
@@ -133,7 +133,7 @@ const normalizeTypeName = function (name, property) {
         return normalizeTypeName(name, property.schema)
     }
     return {
-        name: 'any',
+        name: normalizeStr(name) || 'any',
         type: 'any',
         isBuildIn: isBuildInType('any')
     }
