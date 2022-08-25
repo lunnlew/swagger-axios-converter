@@ -56,11 +56,11 @@ const genMethodDefineItem = function (api) {
                 type: parameter_type.type,
             });
             if (!parameter_type.isBuildIn) {
-                imports.push(parameter_type.type)
+                imports.push(parameter_type.name)
             }
             if (parameter_type.isEnum) {
                 enums.push({
-                    name: parameter_type.type,
+                    name: parameter_type.name,
                     summary: parameter_type.summary || p.description,
                     enums: parameter_type.enums
                 })
@@ -78,11 +78,11 @@ const genMethodDefineItem = function (api) {
                 type: response_type.type
             });
             if (!response_type.isBuildIn) {
-                imports.push(response_type.type)
+                imports.push(response_type.name)
             }
             if (response_type.isEnum) {
                 enums.push({
-                    name: response_type.type,
+                    name: response_type.name,
                     summary: response_type.summary || p.description,
                     enums: response_type.enums
                 })
@@ -253,27 +253,25 @@ const buildModelDeclare = function (model_defines) {
  * @returns 
  */
 const buildModelImports = function (model_defines, imports, is_recursion = false) {
+    let curentIndex = 0
     let models = (model_defines.filter(v => imports.indexOf(v.name) !== -1) || [])
-    if (models.length == 0) {
-        return {
-            models: [],
-            imports: []
+    while(curentIndex <= models.length - 1){
+        let current = models[curentIndex]
+        let current_imports = current.imports
+        let current_imports_models = (model_defines.filter(v => current_imports.indexOf(v.name) !== -1) || [])
+        for(let model of current_imports_models){
+            if(!models.find(q=>q.name === model.name)){
+                models.push(model)
+            }
         }
-    }
-    let result
-    if (is_recursion) {
-        result = buildModelImports(model_defines, Array.from(new Set(models.reduce((p, c) => {
-            return p.concat(c.imports.filter(v => v !== c.name))
-        }, []))))
-    } else {
-        result = {
-            models: models,
-            imports: imports
+        if(!is_recursion){
+            break
         }
+        curentIndex ++
     }
     return {
-        models: models.concat(result.models),
-        imports: Array.from(new Set(imports.concat(result.imports))),
+        models: models,
+        imports: imports
     }
 }
 
@@ -297,10 +295,9 @@ const genClassStyleCode = function (defines, options) {
 
     // 生成类风格定义
     let classes = []
-    let imports = []
     for (let grouped_key in grouped) {
         let classDefine = genClassDefineItem(grouped_key, grouped[grouped_key])
-        let { imports: class_imports, models: class_models } = buildModelImports(model_defines, Array.from(new Set(imports.concat(classDefine.imports))), options.inline_model_declare)
+        let { imports: class_imports, models: class_models } = buildModelImports(model_defines, Array.from(new Set(classDefine.imports)), options.inline_model_declare)
         classes.push({
             name: classDefine.name,
             summary: classDefine.name,
