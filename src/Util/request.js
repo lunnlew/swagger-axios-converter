@@ -23,7 +23,6 @@ const request = async function (options) {
         } else if (url.indexOf('http:') === 0) {
             const http = require('http')
             http.get(url, res => {
-                console.log(res)
                 let data = ''
                 res.setEncoding("utf-8");
                 res.on('data', (chunk) => {
