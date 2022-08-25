@@ -1,7 +1,7 @@
 const { request } = require("../Util/request")
 const { Transform } = require('../Transform')
 const SWAGGER_VERSION_2 = '2.0'
-const OPENAPI_VERSION_3 = '3.0.0'
+const OPENAPI_VERSION_3 = '3.0.0,3.0.1'
 
 /**
  * 类型探测
@@ -18,18 +18,18 @@ const measure = function (data) {
         }
         if (source_data) {
             if (source_data.swagger) {
-                if (source_data.swagger === SWAGGER_VERSION_2) {
+                if (SWAGGER_VERSION_2.indexOf(source_data.swagger)!==-1) {
                     return {
                         type: 'swagger',
-                        version: SWAGGER_VERSION_2,
+                        version: source_data.swagger,
                         data: source_data
                     }
                 }
             } else if (source_data.openapi) {
-                if (source_data.openapi === OPENAPI_VERSION_3) {
+                if (OPENAPI_VERSION_3.indexOf(source_data.openapi)!==-1) {
                     return {
                         type: 'openapi',
-                        version: OPENAPI_VERSION_3,
+                        version: source_data.openapi,
                         data: source_data
                     }
                 }
