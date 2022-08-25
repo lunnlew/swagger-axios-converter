@@ -132,10 +132,16 @@ const normalizeTypeName = function (name, property) {
     } else if (hasProp(property, 'schema')) {
         return normalizeTypeName(name, property.schema)
     }
-    return {
-        name: normalizeStr(name) || 'any',
-        type: 'any',
-        isBuildIn: isBuildInType('any')
+    if (name) {
+        return {
+            name: normalizeStr(name),
+            type: 'any',
+            isBuildIn: isBuildInType('any')
+        }
+    } else {
+        return {
+            name: ''
+        }
     }
 }
 
@@ -168,11 +174,11 @@ const normalizeDeclareClassName = function (name) {
 }
 
 const normalizeEnumName = function (name) {
-    return /^\d/.test(name)?`_${name}`:name
+    return /^\d/.test(name) ? `_${name}` : name
 }
 
 const normalizeEnumCode = function (val) {
-    return Object.prototype.toString.call(val) === '[object String]' ? `\'${val}\'`: val
+    return Object.prototype.toString.call(val) === '[object String]' ? `\'${val}\'` : val
 }
 
 

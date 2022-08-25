@@ -42,22 +42,24 @@ const genMethodDefineItem = function (api) {
     if (api.parameters) {
         for (let p of api.parameters) {
             let parameter_type = normalizeTypeName(p.name, p)
-            parameters.push({
-                name: parameter_type.name,
-                summary: p.description,
-                in: p.in,
-                required: p.required,
-                type: parameter_type.type,
-            });
-            if (!parameter_type.isBuildIn) {
-                imports.push(parameter_type.name)
-            }
-            if (parameter_type.isEnum) {
-                enums.push({
+            if (parameter_type.name) {
+                parameters.push({
                     name: parameter_type.name,
-                    summary: parameter_type.summary || p.description,
-                    enums: parameter_type.enums
-                })
+                    summary: p.description,
+                    in: p.in,
+                    required: p.required,
+                    type: parameter_type.type,
+                });
+                if (!parameter_type.isBuildIn) {
+                    imports.push(parameter_type.name)
+                }
+                if (parameter_type.isEnum) {
+                    enums.push({
+                        name: parameter_type.name,
+                        summary: parameter_type.summary || p.description,
+                        enums: parameter_type.enums
+                    })
+                }
             }
         }
     }
@@ -150,7 +152,7 @@ const genSingleClassFile = function (classDefine, options) {
         group_name: options.group_name
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
-    let import_model_path = options.group_name ? 
+    let import_model_path = options.group_name ?
         (relative_model_import > 0 ? (new Array(relative_model_import)).join('../') : './') :
         (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
     let import_request_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
@@ -189,7 +191,7 @@ const genAllClassFile = function (classes, options) {
         class_name: 'service_index'
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
-    let import_model_path = options.group_name ? 
+    let import_model_path = options.group_name ?
         (relative_model_import > 0 ? (new Array(relative_model_import)).join('../') : './') :
         (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
     let import_request_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
@@ -255,19 +257,19 @@ const buildModelDeclare = function (model_defines) {
 const buildModelImports = function (model_defines, imports, is_recursion = false) {
     let curentIndex = 0
     let models = (model_defines.filter(v => imports.indexOf(v.name) !== -1) || [])
-    while(curentIndex <= models.length - 1){
+    while (curentIndex <= models.length - 1) {
         let current = models[curentIndex]
         let current_imports = current.imports
         let current_imports_models = (model_defines.filter(v => current_imports.indexOf(v.name) !== -1) || [])
-        for(let model of current_imports_models){
-            if(!models.find(q=>q.name === model.name)){
+        for (let model of current_imports_models) {
+            if (!models.find(q => q.name === model.name)) {
                 models.push(model)
             }
         }
-        if(!is_recursion){
+        if (!is_recursion) {
             break
         }
-        curentIndex ++
+        curentIndex++
     }
     return {
         models: models,
@@ -315,7 +317,7 @@ const genClassStyleCode = function (defines, options) {
             codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
         }
         files.push({
-            filename: options.group_name ? options.group_name+'/model_index.ts' : 'model_index.ts',
+            filename: options.group_name ? options.group_name + '/model_index.ts' : 'model_index.ts',
             content: codes.join('\n')
         })
     }
