@@ -69,7 +69,7 @@ class InterimApiDefine {
             for (let contentType in requestBody.content) {
                 let RequestBodyRefType = normalizeTypeName('RequestBody', requestBody.content[contentType])
                 data.push({
-                    schema: requestBody.content[contentType.schema],
+                    schema: requestBody.content[contentType].schema,
                     contentType: contentType,
                     refName: RequestBodyRefType.name,
                     required: true
