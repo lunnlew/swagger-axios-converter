@@ -3,6 +3,6 @@
  */
 export enum {{enum_define.name}} {
     {{each enum_define.enums item}}
-        '{{item}}' = '{{item}}',
+        '{{item|normalizeEnumName}}' = {{@ item|normalizeEnumCode}},
     {{/each}}
 }

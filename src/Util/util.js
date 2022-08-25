@@ -167,9 +167,20 @@ const normalizeDeclareClassName = function (name) {
     return camelcaseStr(normalizeStr(name).split('-').pop() + 'Service', true)
 }
 
+const normalizeEnumName = function (name) {
+    return /^\d/.test(name)?`_${name}`:name
+}
+
+const normalizeEnumCode = function (val) {
+    return Object.prototype.toString.call(val) === '[object String]' ? `\'${val}\'`: val
+}
+
+
 exports.code_format = code_format
 exports.tpl_replace = tpl_replace
 exports.normalizeStr = normalizeStr
+exports.normalizeEnumName = normalizeEnumName
+exports.normalizeEnumCode = normalizeEnumCode
 exports.camelcaseStr = camelcaseStr
 exports.normalizeTypeName = normalizeTypeName
 exports.isBuildInType = isBuildInType

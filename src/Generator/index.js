@@ -1,11 +1,5 @@
 const { normalizeStr, normalizeTypeName, normalizeDeclareClassName, tpl_replace } = require("../Util/util")
 const { CodeTpl } = require('../CodeTpl')
-const template = require('art-template');
-template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name)?.type || 'any' };
-template.defaults.imports.notEmpty = function (params) { return params.length > 0 };
-template.defaults.imports.toPlaceholder = function (name) {
-    return `{${name}}`
-}
 
 const CLASS_CODE_STYLE = 'class'
 
