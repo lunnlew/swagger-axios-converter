@@ -38,7 +38,7 @@ const code_format = function (text, options) {
  * @returns 
  */
 const normalizeStr = function (str) {
-    return str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\] ]/g).filter(v => v).join('_')
+    return str.split(/[`~!@#$%^&*()+<>«»?:"{},.\/;'[\]\- ]/g).filter(v => v).join('_')
 }
 
 /**
