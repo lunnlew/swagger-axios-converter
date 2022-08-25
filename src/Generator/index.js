@@ -131,10 +131,10 @@ const getAxiosDefault = function () {
  * 默认axios导入
  * @returns 
  */
-const getDefaultAxiosImport = function (api_base = '', import_model_path = './') {
+const getDefaultAxiosImport = function (api_base = '', import_request_path = './') {
     return '\n' + CodeTpl('IRequestImport_tpl').render({
         api_base,
-        import_model_path
+        import_request_path
     })
 }
 
@@ -150,7 +150,10 @@ const genSingleClassFile = function (classDefine, options) {
         group_name: options.group_name
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
-    let import_model_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
+    let import_model_path = options.group_name ? 
+        (relative_model_import > 0 ? (new Array(relative_model_import)).join('../') : './') :
+        (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
+    let import_request_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
 
     let import_code = ''
     let declare_model = ''
@@ -166,7 +169,7 @@ const genSingleClassFile = function (classDefine, options) {
         }
     }
 
-    import_code += getDefaultAxiosImport(options.api_base, import_model_path)
+    import_code += getDefaultAxiosImport(options.api_base, import_request_path)
     return {
         filename,
         content: import_code + '\n' + CodeTpl('class_tpl').render({ class_define: classDefine }) + declare_model
@@ -186,7 +189,10 @@ const genAllClassFile = function (classes, options) {
         class_name: 'service_index'
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
-    let import_model_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
+    let import_model_path = options.group_name ? 
+        (relative_model_import > 0 ? (new Array(relative_model_import)).join('../') : './') :
+        (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
+    let import_request_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
 
 
     let codes = []
@@ -210,7 +216,7 @@ const genAllClassFile = function (classes, options) {
         codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
     }
 
-    import_code += getDefaultAxiosImport(options.api_base, import_model_path)
+    import_code += getDefaultAxiosImport(options.api_base, import_request_path)
 
     return {
         filename,
@@ -309,7 +315,7 @@ const genClassStyleCode = function (defines, options) {
             codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
         }
         files.push({
-            filename: 'model_index.ts',
+            filename: options.group_name ? options.group_name+'/model_index.ts' : 'model_index.ts',
             content: codes.join('\n')
         })
     }
