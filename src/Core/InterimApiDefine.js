@@ -145,14 +145,14 @@ class InterimApiDefine {
                 }) : undefined
             })
             if (!property_type.isBuildIn) {
-                propertyDefine.imports.push(property_type.type)
+                propertyDefine.imports.push(property_type.name)
             }
             if (property_type.isEnum) {
                 if (!propertyDefine.enum) {
                     propertyDefine.enum = []
                 }
                 propertyDefine.enum.push({
-                    name: property_type.type,
+                    name: property_type.name,
                     summary: property_type.summary || property.description || key,
                     enums: property_type.enums
                 })
