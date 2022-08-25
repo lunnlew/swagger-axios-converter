@@ -1,11 +1,12 @@
 const fs = require('fs')
 const path = require('path')
 const template = require('art-template');
-const { normalizeEnumName, normalizeEnumCode } = require("../Util/util")
+const { normalizeEnumName, normalizeEnumCode, buildSummary } = require("../Util/util")
 template.defaults.imports.toResponseTypeByName = function (responses, name) { return responses.find(r => r.name === name)?.type || 'any' };
 template.defaults.imports.notEmpty = function (params) { return params.length > 0 };
 template.defaults.imports.normalizeEnumName = normalizeEnumName
 template.defaults.imports.normalizeEnumCode = normalizeEnumCode
+template.defaults.imports.buildSummary = buildSummary
 template.defaults.imports.toPlaceholder = function (name) {
     return `{${name}}`
 }

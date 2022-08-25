@@ -45,7 +45,8 @@ const genMethodDefineItem = function (api) {
             if (parameter_type.name) {
                 parameters.push({
                     name: parameter_type.name,
-                    summary: p.description,
+                    summary: p.summary,
+                    description: p.description,
                     in: p.in,
                     required: p.required,
                     type: parameter_type.type,
@@ -56,7 +57,8 @@ const genMethodDefineItem = function (api) {
                 if (parameter_type.isEnum) {
                     enums.push({
                         name: parameter_type.name,
-                        summary: parameter_type.summary || p.description,
+                        summary: parameter_type.summary ,
+                        description: parameter_type.description,
                         enums: parameter_type.enums
                     })
                 }
@@ -70,7 +72,8 @@ const genMethodDefineItem = function (api) {
             let response_type = normalizeTypeName('response_' + code, p)
             responses.push({
                 name: code,
-                summary: p.description,
+                summary: p.summary,
+                description: p.description,
                 type: response_type.type
             });
             if (!response_type.isBuildIn) {
@@ -79,7 +82,8 @@ const genMethodDefineItem = function (api) {
             if (response_type.isEnum) {
                 enums.push({
                     name: response_type.name,
-                    summary: response_type.summary || p.description,
+                    summary: response_type.summary,
+                    description: response_type.description,
                     enums: response_type.enums
                 })
             }
@@ -91,6 +95,7 @@ const genMethodDefineItem = function (api) {
         enums,
         api: {
             summary: api.summary,
+            description: api.description,
             contentType: api.contentType,
             name: normalizeStr(normalizeStr(api.operationId), false),
             path: api.path,

@@ -1,5 +1,5 @@
 /**
- * {{enum_define.summary}}
+ * {{enum_define|buildSummary}}
  */
 export enum {{enum_define.name}} {
     {{each enum_define.enums item}}

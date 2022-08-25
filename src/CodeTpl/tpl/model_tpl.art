@@ -1,4 +1,4 @@
 /**
- * {{model.summary}}
+ * {{model|buildSummary}}
  */
 export interface {{model.name}} {{include 'propertys_tpl' model}}

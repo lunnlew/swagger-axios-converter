@@ -1,17 +1,17 @@
 /**
- * {{class_define.summary}}
+ * {{class_define|buildSummary}}
  */
 export class {{class_define.name}} {
     {{each class_define.apis api}}
         /**
-        * {{api.summary}}
+        * {{api|buildSummary}}
         */
         static {{api.name}} (
             {{if notEmpty(api.parameters)}} 
             params: {
                 {{each api.parameters param}}
                     /**
-                    * {{param.summary}}
+                    * {{param|buildSummary}}
                     */
                     {{param.name}}{{if !param.required}}?{{/if}}: {{param.type}};
                 {{/each}}

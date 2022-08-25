@@ -83,7 +83,6 @@ const normalizeTypeName = function (name, property) {
                     name: camelcaseStr(normalizeStr('enum_' + name), true),
                     type: camelcaseStr(normalizeStr('enum_' + name), true),
                     enums: property.enum,
-                    summary: property.description,
                     isEnum: true,
                     isBuildIn: isBuildInType('enum')
                 }
@@ -100,7 +99,8 @@ const normalizeTypeName = function (name, property) {
                 name: property_type.name,
                 type: property_type.type + '[]',
                 enums: property_type.enums,
-                summary: property_type.summary || property.description,
+                summary: property_type.summary,
+                description: property_type.description,
                 isEnum: property_type.isEnum,
                 isBuildIn: isBuildInType(property_type.type)
             }
@@ -181,10 +181,14 @@ const normalizeEnumCode = function (val) {
     return Object.prototype.toString.call(val) === '[object String]' ? `\'${val}\'` : val
 }
 
+const buildSummary = function (obj) {
+    return obj.description || obj.summary || obj.name
+}
 
 exports.code_format = code_format
 exports.tpl_replace = tpl_replace
 exports.normalizeStr = normalizeStr
+exports.buildSummary = buildSummary
 exports.normalizeEnumName = normalizeEnumName
 exports.normalizeEnumCode = normalizeEnumCode
 exports.camelcaseStr = camelcaseStr

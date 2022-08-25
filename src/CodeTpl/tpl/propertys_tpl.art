@@ -1,7 +1,7 @@
 {
     {{each properties property}}
         /**
-         * {{property.summary}}
+         * {{property|buildSummary}}
          */
         {{property.name}}: {{if property.properties}}{{include './propertys_tpl' property}}{{else}}{{property.type}}{{/if}};
     {{/each}}

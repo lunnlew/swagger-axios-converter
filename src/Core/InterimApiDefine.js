@@ -51,6 +51,7 @@ class InterimApiDefine {
             let { contentType, parameters } = this.parseRequestBodyToParameters(apis[method])
             let apiDefine = {
                 summary: apis[method].summary,
+                description: apis[method].description,
                 method: method,
                 contentType: contentType,
                 path: path,
@@ -123,7 +124,8 @@ class InterimApiDefine {
     genModelDefineItem(name, model) {
         let propertyDefine = {
             name: normalizeStr(name),
-            summary: model.description || model.title,
+            summary: model.summary || model.title,
+            description: model.description || model.title,
             properties: [],
             imports: []
         }
@@ -131,7 +133,8 @@ class InterimApiDefine {
             let property = model.properties[key]
             let property_type = normalizeTypeName(key, property)
             propertyDefine.properties.push({
-                summary: property.description || key,
+                summary: property.summary || property_type.summary || key,
+                description: property.description || property_type.description || key,
                 name: normalizeStr(key),
                 type: property_type.type,
                 properties: property.properties ? Object.keys(property.properties).map(k => {
@@ -153,7 +156,8 @@ class InterimApiDefine {
                 }
                 propertyDefine.enum.push({
                     name: property_type.name,
-                    summary: property_type.summary || property.description || key,
+                    summary: property.summary || property_type.summary || key,
+                    description: property.description || property_type.description || key,
                     enums: property_type.enums
                 })
             }
