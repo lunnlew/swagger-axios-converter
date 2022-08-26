@@ -116,6 +116,19 @@ const normalizeTypeName = function (name, property) {
                 type: 'any',
                 isBuildIn: isBuildInType('any')
             }
+        } else {
+            if(hasProp(property, 'additionalProperties')){
+                let property_type = normalizeTypeName(name, property.additionalProperties)
+                return {
+                    name: property_type.name,
+                    type: property_type.type,
+                    enums: property_type.enums,
+                    summary: property_type.summary,
+                    description: property_type.description,
+                    isEnum: property_type.isEnum,
+                    isBuildIn: isBuildInType(property_type.type)
+                }
+            }
         }
         return {
             name: normalizeStr(property.type),
