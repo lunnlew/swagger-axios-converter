@@ -1,9 +1,9 @@
 ## 使用
 
 ```js
-const { Extractor, Generator, FileWriter } = require("../src/index");
+const { Extractor, Generator, FileWriter } = require("swagger-axios-converter");
 
-Extractor.fetch(
+Extractor.measure(
   "https://app.swaggerhub.com/apiproxy/registry/wangyf/Cable/1.0.0"
 ).then((res) => {
   FileWriter.write(
