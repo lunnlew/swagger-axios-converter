@@ -73,7 +73,7 @@ class InterimApiDefine {
                     schema: requestBody.content[contentType].schema,
                     contentType: contentType,
                     refName: RequestBodyRefType.name,
-                    required: true
+                    required: requestBody.required
                 })
             }
             return data
