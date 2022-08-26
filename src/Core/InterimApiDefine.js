@@ -144,7 +144,7 @@ class InterimApiDefine {
                     let p_type = normalizeTypeName(normalizeStr(k), p)
                     return {
                         summary: k,
-                        name: k,
+                        name: p_type.name,
                         type: p_type.type
                     }
                 }) : undefined

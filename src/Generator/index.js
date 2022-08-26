@@ -57,7 +57,7 @@ const genMethodDefineItem = function (api) {
                 if (parameter_type.isEnum) {
                     enums.push({
                         name: parameter_type.name,
-                        summary: parameter_type.summary ,
+                        summary: parameter_type.summary,
                         description: parameter_type.description,
                         enums: parameter_type.enums
                     })
@@ -68,8 +68,8 @@ const genMethodDefineItem = function (api) {
     let responses = []
     if (api.responses) {
         for (let code in api.responses) {
-            if(api.responses[code]['content']){
-                for(let contentType in api.responses[code]['content']){
+            if (api.responses[code]['content']) {
+                for (let contentType in api.responses[code]['content']) {
                     let p = api.responses[code]['content'][contentType]
                     let response_type = normalizeTypeName('response_' + code, p)
                     responses.push({
@@ -93,7 +93,7 @@ const genMethodDefineItem = function (api) {
                     }
                 }
             }
-            
+
         }
     }
 
@@ -165,9 +165,9 @@ const genSingleClassFile = function (classDefine, options) {
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
     let import_model_path = options.group_name ?
-        (relative_model_import > 0 ? (new Array(relative_model_import)).join('../') : './') :
-        (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
-    let import_request_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
+        (relative_model_import > 0 ? ((new Array(relative_model_import)).join('../') || './') : './') :
+        (relative_model_import > 0 ? ((new Array(relative_model_import + 1)).join('../') || './') : './')
+    let import_request_path = (relative_model_import > 0 ? ((new Array(relative_model_import + 1)).join('../') || './') : './')
 
     let import_code = ''
     let declare_model = ''
@@ -204,9 +204,9 @@ const genAllClassFile = function (classes, options) {
     }) : (classDefine.name + '.ts')
     let relative_model_import = filename.replace(/[\\]/ig, '/').split('/').length - 1 - (options.relative_model_import ?? 0)
     let import_model_path = options.group_name ?
-        (relative_model_import > 0 ? (new Array(relative_model_import)).join('../') : './') :
-        (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
-    let import_request_path = (relative_model_import > 0 ? (new Array(relative_model_import + 1)).join('../') : './')
+        (relative_model_import > 0 ? ((new Array(relative_model_import)).join('../') || './') : './') :
+        (relative_model_import > 0 ? ((new Array(relative_model_import + 1)).join('../') || './') : './')
+    let import_request_path = (relative_model_import > 0 ? ((new Array(relative_model_import + 1)).join('../') || './') : './')
 
 
     let codes = []
@@ -329,7 +329,7 @@ const genClassStyleCode = function (defines, options) {
             codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
         }
         files.push({
-            filename: options.group_name ? options.group_name + '/model_index.ts' : 'model_index.ts',
+            filename: options.group_name ? options.group_name + '/model_index.ts' : './model_index.ts',
             content: codes.join('\n')
         })
     }

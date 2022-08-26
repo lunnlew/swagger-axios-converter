@@ -61,34 +61,34 @@ const normalizeTypeName = function (name, property) {
     if (hasProp(property, 'type')) {
         if (['integer', 'Int64', 'Int32', 'int', 'number'].indexOf(property.type) !== -1) {
             return {
-                name,
+                name: normalizeStr(name),
                 type: 'number',
                 isBuildIn: isBuildInType('number')
             }
         } else if (['bool', 'boolean'].indexOf(property.type) !== -1) {
             return {
-                name,
+                name: normalizeStr(name),
                 type: 'boolean',
                 isBuildIn: isBuildInType('boolean')
             }
         } else if (['string'].indexOf(property.type) !== -1) {
             if (property.format === 'date' || property.format === 'date-time') {
                 return {
-                    name,
+                    name: normalizeStr(name),
                     type: 'Date',
                     isBuildIn: isBuildInType('Date')
                 }
             } else if (hasProp(property, 'enum')) {
                 return {
-                    name: camelcaseStr(normalizeStr('enum_' + name), true),
-                    type: camelcaseStr(normalizeStr('enum_' + name), true),
+                    name: normalizeStr('enum_' + name),
+                    type: normalizeStr('enum_' + name),
                     enums: property.enum,
                     isEnum: true,
                     isBuildIn: isBuildInType('enum')
                 }
             } else {
                 return {
-                    name,
+                    name: normalizeStr(name),
                     type: 'string',
                     isBuildIn: isBuildInType('string')
                 }
@@ -106,18 +106,18 @@ const normalizeTypeName = function (name, property) {
             }
         } else if (property.type === 'file') {
             return {
-                name,
+                name: normalizeStr(name),
                 type: 'File',
                 isBuildIn: isBuildInType('File')
             }
         } else if (property.type === 'ref') {
             return {
-                name,
+                name: normalizeStr(name),
                 type: 'any',
                 isBuildIn: isBuildInType('any')
             }
         } else {
-            if(hasProp(property, 'additionalProperties')){
+            if (hasProp(property, 'additionalProperties')) {
                 let property_type = normalizeTypeName(name, property.additionalProperties)
                 return {
                     name: property_type.name,
