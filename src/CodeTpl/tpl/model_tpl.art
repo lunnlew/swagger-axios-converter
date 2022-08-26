@@ -1,4 +1,5 @@
+{{if buildSummary(model)}}
 /**
  * {{model|buildSummary}}
- */
+ */{{/if}}
 export interface {{model.name}} {{include 'propertys_tpl' model}}

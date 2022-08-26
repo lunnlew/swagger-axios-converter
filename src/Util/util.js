@@ -182,7 +182,7 @@ const normalizeEnumCode = function (val) {
 }
 
 const buildSummary = function (obj) {
-    return obj.description || obj.summary || obj.name
+    return obj.description || obj.summary
 }
 
 exports.code_format = code_format

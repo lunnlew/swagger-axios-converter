@@ -100,6 +100,7 @@ class InterimApiDefine {
                     required: DefaultRequestBody.require,
                     schema: DefaultRequestBody.schema
                 })
+                contentType = DefaultRequestBody.contentType
             }
         }
         if (hasProp(api, 'parameters')) {
@@ -133,8 +134,8 @@ class InterimApiDefine {
             let property = model.properties[key]
             let property_type = normalizeTypeName(key, property)
             propertyDefine.properties.push({
-                summary: property.summary || property_type.summary || key,
-                description: property.description || property_type.description || key,
+                summary: property.summary || property_type.summary,
+                description: property.description || property_type.description,
                 name: normalizeStr(key),
                 type: property_type.type,
                 properties: property.properties ? Object.keys(property.properties).map(k => {
@@ -156,8 +157,8 @@ class InterimApiDefine {
                 }
                 propertyDefine.enum.push({
                     name: property_type.name,
-                    summary: property.summary || property_type.summary || key,
-                    description: property.description || property_type.description || key,
+                    summary: property.summary || property_type.summary,
+                    description: property.description || property_type.description,
                     enums: property_type.enums
                 })
             }

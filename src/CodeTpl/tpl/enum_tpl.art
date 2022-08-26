@@ -1,6 +1,7 @@
+{{if buildSummary(enum_define)}}
 /**
  * {{enum_define|buildSummary}}
- */
+ */{{/if}}
 export enum {{enum_define.name}} {
     {{each enum_define.enums item}}
         '{{item|normalizeEnumName}}' = {{@ item|normalizeEnumCode}},

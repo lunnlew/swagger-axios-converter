@@ -1,18 +1,21 @@
+{{if buildSummary(class_define)}}
 /**
  * {{class_define|buildSummary}}
- */
+ */{{/if}}
 export class {{class_define.name}} {
     {{each class_define.apis api}}
+        {{if buildSummary(api)}}
         /**
         * {{api|buildSummary}}
-        */
+        */{{/if}}
         static {{api.name}} (
             {{if notEmpty(api.parameters)}} 
             params: {
                 {{each api.parameters param}}
+                    {{if buildSummary(param)}}
                     /**
                     * {{param|buildSummary}}
-                    */
+                    */{{/if}}
                     {{param.name}}{{if !param.required}}?{{/if}}: {{param.type}};
                 {{/each}}
             },
@@ -21,31 +24,40 @@ export class {{class_define.name}} {
             ): Promise<{{api.responses|toResponseTypeByName '200'}}> {
                 return new Promise((resolve, reject) => {
                     let url = '{{api.path}}';
-                    let query = {} as any;
-                    let data = {} as any;
-                    let formData = new FormData();
+                    {{ set useQueryData = false }}
+                    {{ set useData = false }}
                     {{ set useFormData = false }}
                     {{if notEmpty(api.parameters)}} 
                         {{each api.parameters param}}
                             {{if param.in=='path'}}
                                 url = url.replace('{{param.name|toPlaceholder}}', params['{{param.name}}'] + '');
                             {{else if param.in=='query'}}
+                                {{if useQueryData === false}}
+                                let query = {} as any;
+                                {{/if}}
+                                {{set useQueryData1 = useQueryData = true}}
                                 query['{{param.name}}'] = params['{{param.name}}'];
                             {{else if param.in=='body'}}
+                                {{if useData === false}}
+                                let data = {} as any;
+                                {{/if}}
+                                {{set useData1 = useData = true}}
                                 data = params['{{param.name}}'];
                             {{else if param.in=='formData'}}
+                                {{if useFormData === false}}
+                                let formData = new FormData();
+                                {{/if}}
                                 {{set useFormData1 = useFormData = true}}
                                 formData.append('{{param.name}}', params['{{param.name}}']);
                             {{/if}}
                         {{/each}}
                     {{/if}}
                     const configs: IRequestConfig = getConfigs('{{api.method}}', '{{api.contentType}}', url, options);
-                    configs.params = query;
-                    {{if useFormData}}
-                    configs.data = formData;
-                    {{else}}
-                    configs.data = data;
-                    {{/if}}
+
+                    {{if useQueryData === true}}configs.params = query;{{/if}}
+                    {{if useFormData === true}}configs.data = formData;{{/if}}
+                    {{if useData === true}}configs.data = data;{{/if}}
+
                     axios(configs, resolve, reject);
                 })
         }
