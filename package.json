@@ -3,7 +3,9 @@
   "version": "1.0.14",
   "description": "",
   "main": "src/index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\""
+  },
   "repository": {
     "type": "github",
     "url": "https://github.com/lunnlew/swagger-axios-converter.git"
