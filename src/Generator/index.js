@@ -166,10 +166,10 @@ const getAxiosDefault = function () {
  * 默认axios导入
  * @returns 
  */
-const getDefaultAxiosImport = function (api_base = '', import_request_path = './') {
+const getDefaultAxiosImport = function (import_request_path = './', options) {
     return '\n' + CodeTpl('IRequestImport_tpl').render({
-        api_base,
-        import_request_path
+        import_request_path,
+        options
     })
 }
 
@@ -204,7 +204,7 @@ const genSingleClassFile = function (classDefine, options) {
         }
     }
 
-    import_code += getDefaultAxiosImport(options.api_base, import_request_path)
+    import_code += getDefaultAxiosImport(import_request_path, options)
     return {
         filename,
         content: import_code + '\n' + CodeTpl('class_tpl').render({ class_define: classDefine }) + declare_model
@@ -251,7 +251,7 @@ const genAllClassFile = function (classes, options) {
         codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
     }
 
-    import_code += getDefaultAxiosImport(options.api_base, import_request_path)
+    import_code += getDefaultAxiosImport(import_request_path, options)
 
     return {
         filename,

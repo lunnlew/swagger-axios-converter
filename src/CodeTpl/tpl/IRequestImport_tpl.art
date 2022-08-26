@@ -2,15 +2,11 @@ import { IRequestOptions, IRequestConfig, serviceOptions, getConfigs } from '{{i
 
 export function axios(configs: IRequestConfig, resolve: (p: any) => void, reject: (p: any) => void): Promise<any> {
   if (serviceOptions.axios) {
-    configs.baseURL = '{{api_base}}';
+    configs.baseURL = '{{options.api_base}}';
     return serviceOptions.axios
       .request(configs)
-      .then((res) => {
-        resolve(res.data);
-      })
-      .catch((err) => {
-        reject(err);
-      });
+      .then(res => resolve({{if options.resolve_full_response}}res{{else}}res.data{{/if}}))
+      .catch(err => reject(err));
   } else {
     throw new Error('please inject yourself instance like axios  ');
   }
