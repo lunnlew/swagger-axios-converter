@@ -1,4 +1,4 @@
-const { normalizeStr, normalizeTypeName, normalizeDeclareClassName, tpl_replace } = require("../Util/util")
+const { normalizeStr, camelcaseStr, normalizeTypeName, normalizeDeclareClassName, tpl_replace } = require("../Util/util")
 const { CodeTpl } = require('../CodeTpl')
 
 const CLASS_CODE_STYLE = 'class'
@@ -97,7 +97,7 @@ const genMethodDefineItem = function (api) {
             summary: api.summary,
             description: api.description,
             contentType: api.contentType,
-            name: normalizeStr(normalizeStr(api.operationId), false),
+            name: camelcaseStr(normalizeStr(api.operationId), false),
             path: api.path,
             method: api.method,
             parameters: parameters,
