@@ -138,6 +138,7 @@ class InterimApiDefine {
                 description: property.description || property_type.description,
                 name: normalizeStr(key),
                 type: property_type.type,
+                required: model.required ? model.required.includes(key) : false,
                 properties: property.properties ? Object.keys(property.properties).map(k => {
                     let p = property.properties[k]
                     let p_type = normalizeTypeName(normalizeStr(k), p)

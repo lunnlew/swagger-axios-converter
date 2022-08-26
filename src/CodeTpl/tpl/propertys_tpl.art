@@ -4,6 +4,6 @@
         /**
          * {{property|buildSummary}}
          */{{/if}}
-        {{property.name}}: {{if property.properties}}{{include './propertys_tpl' property}}{{else}}{{property.type}}{{/if}};
+        {{property.name}}{{if !property.required}}?{{/if}}: {{if property.properties}}{{include './propertys_tpl' property}}{{else}}{{property.type}}{{/if}};
     {{/each}}
 }
