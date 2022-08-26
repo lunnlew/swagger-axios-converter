@@ -68,25 +68,32 @@ const genMethodDefineItem = function (api) {
     let responses = []
     if (api.responses) {
         for (let code in api.responses) {
-            let p = api.responses[code]
-            let response_type = normalizeTypeName('response_' + code, p)
-            responses.push({
-                name: code,
-                summary: p.summary,
-                description: p.description,
-                type: response_type.type
-            });
-            if (!response_type.isBuildIn) {
-                imports.push(response_type.name)
+            if(api.responses[code]['content']){
+                for(let contentType in api.responses[code]['content']){
+                    let p = api.responses[code]['content'][contentType]
+                    let response_type = normalizeTypeName('response_' + code, p)
+                    responses.push({
+                        name: response_type.name,
+                        responseCode: code,
+                        summary: p.summary,
+                        description: p.description,
+                        type: response_type.type,
+                        contentType
+                    });
+                    if (!response_type.isBuildIn) {
+                        imports.push(response_type.name)
+                    }
+                    if (response_type.isEnum) {
+                        enums.push({
+                            name: response_type.name,
+                            summary: response_type.summary,
+                            description: response_type.description,
+                            enums: response_type.enums
+                        })
+                    }
+                }
             }
-            if (response_type.isEnum) {
-                enums.push({
-                    name: response_type.name,
-                    summary: response_type.summary,
-                    description: response_type.description,
-                    enums: response_type.enums
-                })
-            }
+            
         }
     }
 
