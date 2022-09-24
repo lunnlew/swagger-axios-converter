@@ -2,7 +2,7 @@
 /**
  * {{enum_define|buildSummary}}
  */{{/if}}
-export enum {{enum_define.name}} {
+export enum {{enum_define.type}} {
     {{each enum_define.enums item}}
         '{{item|normalizeEnumName}}' = {{@ item|normalizeEnumCode}},
     {{/each}}

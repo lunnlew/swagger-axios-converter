@@ -80,9 +80,11 @@ const normalizeTypeName = function (name, property) {
                 }
             } else if (hasProp(property, 'enum')) {
                 return {
-                    name: camelcaseStr(normalizeStr('enum_' + name), true),
+                    name,
                     type: camelcaseStr(normalizeStr('enum_' + name), true),
                     enums: property.enum,
+                    summary: property.summary,
+                    description: property.description,
                     isEnum: true,
                     isBuildIn: isBuildInType('enum')
                 }

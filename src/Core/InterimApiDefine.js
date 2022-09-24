@@ -158,6 +158,7 @@ class InterimApiDefine {
                 }
                 propertyDefine.enum.push({
                     name: property_type.name,
+                    type: property_type.type,
                     summary: property.summary || property_type.summary,
                     description: property.description || property_type.description,
                     enums: property_type.enums

@@ -57,6 +57,7 @@ const genMethodDefineItem = function (api) {
                 if (parameter_type.isEnum) {
                     enums.push({
                         name: parameter_type.name,
+                        type: parameter_type.type,
                         summary: parameter_type.summary,
                         description: parameter_type.description,
                         enums: parameter_type.enums
@@ -86,6 +87,7 @@ const genMethodDefineItem = function (api) {
                     if (response_type.isEnum) {
                         enums.push({
                             name: response_type.name,
+                            type: response_type.type,
                             summary: response_type.summary,
                             description: response_type.description,
                             enums: response_type.enums
@@ -109,6 +111,7 @@ const genMethodDefineItem = function (api) {
                 if (response_type.isEnum) {
                     enums.push({
                         name: response_type.name,
+                        type: response_type.type,
                         summary: response_type.summary,
                         description: response_type.description,
                         enums: response_type.enums
@@ -120,7 +123,7 @@ const genMethodDefineItem = function (api) {
 
     return {
         imports,
-        enums,
+        enum: enums,
         api: {
             summary: api.summary,
             description: api.description,
@@ -146,12 +149,17 @@ const genClassDefineItem = function (name, apis) {
         apis: [],
         imports: []
     }
+    let enums = {}
     for (let api of apis) {
         let itemDefine = genMethodDefineItem(api)
         classDefine.imports.push(...itemDefine.imports)
         classDefine.apis.push(itemDefine.api)
+        itemDefine.enum.map(v => {
+            enums[v.name] = v
+            classDefine.imports.push(v.type)
+        })
     }
-    return classDefine
+    return { classDefine, enums }
 }
 
 /**
@@ -197,6 +205,7 @@ const genSingleClassFile = function (classDefine, options) {
             import_code = `import { ${Array.from(new Set(imports)).join(', ')} } from '${import_model_path}model_index'`
         } else {
             let { codes, enums } = buildModelDeclare(classDefine.models)
+            enums = Object.assign({}, enums, classDefine.enums)
             for (let enum_name in enums) {
                 codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
             }
@@ -237,7 +246,7 @@ const genAllClassFile = function (classes, options) {
         if (options.inline_model_declare) {
             let { codes: model_codes, enums: model_enums } = buildModelDeclare(classDefine.models)
             codes.push(...model_codes)
-            enums = Object.assign({}, enums, model_enums)
+            enums = Object.assign({}, enums, model_enums, classDefine.enums)
         }
         codes.push(CodeTpl('class_tpl').render({ class_define: classDefine }))
     }
@@ -330,22 +339,26 @@ const genClassStyleCode = function (defines, options) {
 
     // 生成类风格定义
     let classes = []
+    let enums = {}
     for (let grouped_key in grouped) {
-        let classDefine = genClassDefineItem(grouped_key, grouped[grouped_key])
+        let { classDefine, enums: class_enums } = genClassDefineItem(grouped_key, grouped[grouped_key])
         let { imports: class_imports, models: class_models } = buildModelImports(model_defines, Array.from(new Set(classDefine.imports)), options.inline_model_declare)
         classes.push({
             name: classDefine.name,
             summary: classDefine.name,
             imports: class_imports,
             apis: classDefine.apis,
-            models: class_models
+            models: class_models,
+            enums: class_enums
         })
+        enums = Object.assign({}, enums, class_enums)
     }
 
     // 文件列表
     let files = []
     if (!options.inline_model_declare) {
-        let { codes, enums } = buildModelDeclare(model_defines)
+        let { codes, enums: model_enums } = buildModelDeclare(model_defines)
+        enums = Object.assign({}, enums, model_enums)
         for (let enum_name in enums) {
             codes.push(CodeTpl('enum_tpl').render({ enum_define: enums[enum_name] }))
         }
